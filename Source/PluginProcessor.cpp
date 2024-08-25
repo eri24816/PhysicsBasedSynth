@@ -152,31 +152,31 @@ void PhysicsBasedSynthAudioProcessor::processBlock (juce::AudioBuffer<float>& bu
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear (i, 0, buffer.getNumSamples());
 
-    for (int i = 0; i < mySynth.getNumVoices(); i++)
-    {
-        if ((myVoice = dynamic_cast<SynthVoice*>(mySynth.getVoice(i))))
-        {
-            auto attackValue = valueTree.getRawParameterValue("ATTACK");
-            auto decayValue = valueTree.getRawParameterValue("DECAY");
-            auto sustainValue = valueTree.getRawParameterValue("SUSTAIN");
-            auto releaseValue = valueTree.getRawParameterValue("RELEASE");
+    //for (int i = 0; i < mySynth.getNumVoices(); i++)
+    //{
+    //    if ((myVoice = dynamic_cast<SynthVoice*>(mySynth.getVoice(i))))
+    //    {
+    //        auto attackValue = valueTree.getRawParameterValue("ATTACK");
+    //        auto decayValue = valueTree.getRawParameterValue("DECAY");
+    //        auto sustainValue = valueTree.getRawParameterValue("SUSTAIN");
+    //        auto releaseValue = valueTree.getRawParameterValue("RELEASE");
 
-            myVoice->getEnvelope(attackValue->load(),
-                decayValue->load(),
-                sustainValue->load(),
-                releaseValue->load());
+    //        myVoice->getEnvelope(attackValue->load(),
+    //            decayValue->load(),
+    //            sustainValue->load(),
+    //            releaseValue->load());
 
-            auto waveformValue = valueTree.getRawParameterValue("WAVEFORM");
+    //        auto waveformValue = valueTree.getRawParameterValue("WAVEFORM");
 
-            myVoice->getOscWaveform(waveformValue->load());
+    //        myVoice->getOscWaveform(waveformValue->load());
 
-            auto filterTypeValue = valueTree.getRawParameterValue("FILTER_TYPE");
-            auto filterCutoffValue = valueTree.getRawParameterValue("FILTER_CUTOFF");
-            auto filterResonanceValue = valueTree.getRawParameterValue("FILTER_RESONANCE");
+    //        auto filterTypeValue = valueTree.getRawParameterValue("FILTER_TYPE");
+    //        auto filterCutoffValue = valueTree.getRawParameterValue("FILTER_CUTOFF");
+    //        auto filterResonanceValue = valueTree.getRawParameterValue("FILTER_RESONANCE");
 
-            myVoice->getFilter(filterTypeValue->load(), filterCutoffValue->load(), filterResonanceValue->load());
-        }
-    }
+    //        myVoice->getFilter(filterTypeValue->load(), filterCutoffValue->load(), filterResonanceValue->load());
+    //    }
+    //}
 
     buffer.clear();
     mySynth.renderNextBlock(buffer, midiMessages, 0, buffer.getNumSamples());

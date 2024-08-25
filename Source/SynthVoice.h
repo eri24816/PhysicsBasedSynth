@@ -11,7 +11,10 @@
 
 #include <JuceHeader.h>
 #include "SynthSound.h"
-#include "maximilian.h"
+
+#include "Simulation.h"
+#include "String.h"
+#include "Hammer.h"
 
 using namespace juce;
 
@@ -23,66 +26,24 @@ public:
     {
         return dynamic_cast <SynthSound*>(sound) != nullptr;
     }
-
-    void getOscWaveform(float waveform)
-    {
-        theWave = int(waveform);
-    }
-
-    double setOscWaveform()
-    {
-        switch(theWave)
-        {
-            case 0: return osc1.sinewave(frequency);
-            case 1: return osc1.saw(frequency);
-            case 2: return osc1.square(frequency);
-            default: return osc1.sinewave(frequency); 
-        }
-    }
-
-    void getEnvelope(float attack, float decay, float sustain, float release)
-    {
-        env1.setAttack(double(attack));
-        env1.setDecay(double(decay));
-        env1.setSustain(double(sustain));
-        env1.setRelease(double(release));
-    }
-
-    double setEnvelope()
-    {
-        return env1.adsr(setOscWaveform(), env1.trigger);
-    }
-
-    void getFilter(float filterType, float filterCutoff, float filterResonance)
-    {
-        filterSelection = int(filterType);
-        cutoff = filterCutoff;
-        resonance = filterResonance;
-    }
-
-    double setFilter()
-    {
-        switch(filterSelection)
-        {
-            case 0: return filter1.lores(setEnvelope(), cutoff, resonance);
-            case 1: return filter1.hires(setEnvelope(), cutoff, resonance);
-            case 2: return filter1.bandpass(setEnvelope(), cutoff, resonance);
-            default: return filter1.lores(setEnvelope(), cutoff, resonance);
-        }
-    }
     
     void startNote (int midiNoteNumber, float velocity, SynthesiserSound* sound, int currentPitchWheelPosition) override
     {
-        env1.trigger = 1;
+		this->pitch = midiNoteNumber;
+        this->velocity = velocity;
         frequency = MidiMessage::getMidiNoteInHertz(midiNoteNumber);
-        level = velocity;
+
+		simulation = std::make_unique<InstrumentPhysics::Simulation>();
+
+        string = std::make_shared<InstrumentPhysics::String>(frequency);
+        hammer = std::make_shared<InstrumentPhysics::Hammer>(1.0f, 0.5f);
+		simulation->addObject(string);
+		simulation->addObject(hammer);
     }
     
     void stopNote (float velocity, bool allowTailOff) override
     {
-        env1.trigger = 0;
-        allowTailOff = true;
-        
+		simulation.reset();
         if (velocity == 0)
             clearCurrentNote();
     }
@@ -101,26 +62,24 @@ public:
     {
         for (int sample = 0; sample < numSamples; ++sample)
         {
-
+			const float currentSample = string->sampleU(0.01,simulation->getTime());
             for (int channel = 0; channel < outputBuffer.getNumChannels(); ++channel)
             {
-                outputBuffer.addSample(channel, startSample, setFilter() * 0.3f);
+				outputBuffer.addSample(channel, startSample, currentSample);
             }
             ++startSample;
         }
     }
 
 private:
-    double level;
+    int pitch;
+    double velocity;
     double frequency;
-    int theWave;
-
-    int filterSelection;
-    double cutoff;
-    double resonance;
     
-    maxiOsc osc1;
-    maxiEnv env1;
-    maxiFilter filter1;
+	// objects are shared with simulation
+    std::shared_ptr<InstrumentPhysics::String> string;
+    std::shared_ptr<InstrumentPhysics::Hammer> hammer;
+
+	std::unique_ptr<InstrumentPhysics::Simulation> simulation;
 
 };
