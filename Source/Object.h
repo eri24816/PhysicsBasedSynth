@@ -16,6 +16,6 @@ namespace InstrumentPhysics
 	{
 	public:
 
-		virtual void update(float t, float dt) = 0;
+		virtual void update(float t, float dt) {};
 	};
 }

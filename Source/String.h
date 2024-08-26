@@ -22,19 +22,19 @@ namespace InstrumentPhysics {
 	class String : public Object
 	{
 	public:
-		String(float L, float tension, float mass, float ESK2, int nHarmonics);
-		~String() = default;
+		String(float L, float tension, float mass, float ESK2, int nHarmonics, float damping);
 
 		float a[STRING_MAX_HARMONICS + 1] = { 0 };
 		float b[STRING_MAX_HARMONICS + 1] = { 0 };
 
 		float sampleU(float x, float t) const;
+		void update(float t, float dt) override;
 		void applyImpulse(float x, float t, float J);
 
 		Transform transform;
 
 	private:
-		float L, tension, mass, rho, ESK2, B, c, f0;
+		float L, tension, rho, ESK2, B, c, f0, damping;
 		int nHarmonics;
 		float harmonicFreqs[STRING_MAX_HARMONICS + 1] = { 0 };
 		float harmonicOmega[STRING_MAX_HARMONICS + 1] = { 0 };

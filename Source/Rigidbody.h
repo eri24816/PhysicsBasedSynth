@@ -29,20 +29,4 @@ namespace InstrumentPhysics
 		void applyImpulse(Vector2<float> pos, float t, Vector2<float> impulse);
 	};
 
-	class Transform {
-	public:
-		Transform(Transform* parent, Vector2<float> localPos)
-			: parent(parent), localPos(localPos)
-		{
-			
-		};
-
-		Transform* parent;
-		Vector2<float> localPos;
-
-		Vector2<float> getWorldPos() const {
-			return parent ? parent->getWorldPos() + localPos : localPos;
-		}
-
-	};
 };

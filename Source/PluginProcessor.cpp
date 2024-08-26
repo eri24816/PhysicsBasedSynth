@@ -109,6 +109,7 @@ void PhysicsBasedSynthAudioProcessor::prepareToPlay (double sampleRate, int samp
 {
     // Use this method as the place to do any pre-playback
     // initialisation that you need..
+    mySynth.setCurrentPlaybackSampleRate(sampleRate);
 }
 
 void PhysicsBasedSynthAudioProcessor::releaseResources()

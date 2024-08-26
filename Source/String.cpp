@@ -14,8 +14,8 @@
 
 namespace InstrumentPhysics {
 
-	String::String(float L, float tension, float mass, float ESK2, int nHarmonics)
-		: L(L), tension(tension), mass(mass), ESK2(ESK2), nHarmonics(nHarmonics)
+	String::String(float L, float tension, float rho, float ESK2, int nHarmonics, float damping)
+		: L(L), tension(tension), rho(rho), ESK2(ESK2), nHarmonics(nHarmonics), transform(nullptr, Vector2<float>{0.0f, 0.0f}), damping(damping)
 	{
 		// raise if nHarmonics > STRING_MAX_HARMONICS
 
@@ -24,7 +24,6 @@ namespace InstrumentPhysics {
 			throw std::invalid_argument("nHarmonics > STRING_MAX_HARMONICS");
 		}
 
-		rho = mass / L;
 		B = PI * PI * ESK2 / tension / L / L;
 		c = std::sqrtf(tension / rho);
 		f0 = c / (2 * L);
@@ -49,6 +48,18 @@ namespace InstrumentPhysics {
 			u += a[n] * std::cos(omegaT) * xComp + b[n] * std::sin(omegaT) * xComp;
 		}
 		return u;
+	}
+
+	void String::update(float t, float dt)
+	{
+		// TODO: use a physical damping model
+		if (damping!=0) {
+			for (int n = 1; n <= nHarmonics; n++)
+			{
+				a[n] *= std::exp(-damping*0.002 * dt * harmonicFreqs[n]);
+				b[n] *= std::exp(-damping*0.002 * dt * harmonicFreqs[n]);
+			}
+		}
 	}
 
 	void String::applyImpulse(float x, float t, float J)

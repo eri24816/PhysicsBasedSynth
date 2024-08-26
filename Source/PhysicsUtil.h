@@ -40,4 +40,28 @@ namespace InstrumentPhysics
 		return Vector2<T>{-a.x, -a.y};
 	}
 
+
+	class Transform {
+	public:
+		Transform(Transform* parent, Vector2<float> localPos)
+			: parent(parent), localPos(localPos)
+		{
+
+		};
+
+		Transform(float x, float y)
+			: parent(nullptr), localPos({ x, y })
+		{
+
+		};
+
+		Transform* parent;
+		Vector2<float> localPos;
+
+		Vector2<float> getWorldPos() const {
+			return parent ? parent->getWorldPos() + localPos : localPos;
+		}
+
+	};
+
 }
