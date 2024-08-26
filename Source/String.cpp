@@ -69,8 +69,4 @@ namespace InstrumentPhysics {
 	{
 		return n * f0 * std::sqrtf(1 + B * n * n);
 	}
-
-
-
-
 }

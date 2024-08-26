@@ -12,6 +12,7 @@
 #include <vector>
 #include <memory>
 #include "Object.h"
+#include "Interactions.h"
 
 namespace InstrumentPhysics
 {
@@ -22,10 +23,13 @@ namespace InstrumentPhysics
 		~Simulation();
 
 		void addObject(std::shared_ptr<Object> object);
+		void addInteraction(std::shared_ptr<Interaction> interaction);
+		float getTime() const;
 		void update(float dt);
 	private:
 		float t;
 
 		std::vector<std::shared_ptr<Object>> objects;
+		std::vector<std::shared_ptr<Interaction>> interactions;
 	};
 }

@@ -14,7 +14,7 @@
 
 #include "Simulation.h"
 #include "String.h"
-#include "Hammer.h"
+#include "Rigidbody.h"
 
 using namespace juce;
 
@@ -36,7 +36,7 @@ public:
 		simulation = std::make_unique<InstrumentPhysics::Simulation>();
 
         string = std::make_shared<InstrumentPhysics::String>(frequency);
-        hammer = std::make_shared<InstrumentPhysics::Hammer>(1.0f, 0.5f);
+        hammer = std::make_shared<InstrumentPhysics::Rigidbody>(1.0f, 0.5f);
 		simulation->addObject(string);
 		simulation->addObject(hammer);
     }
@@ -60,8 +60,10 @@ public:
     
     void renderNextBlock (AudioBuffer <float> &outputBuffer, int startSample, int numSamples) override
     {
+		const float dt = 1.0f / 44100.0f;
         for (int sample = 0; sample < numSamples; ++sample)
         {
+			simulation->update(dt);
 			const float currentSample = string->sampleU(0.01,simulation->getTime());
             for (int channel = 0; channel < outputBuffer.getNumChannels(); ++channel)
             {
@@ -78,7 +80,7 @@ private:
     
 	// objects are shared with simulation
     std::shared_ptr<InstrumentPhysics::String> string;
-    std::shared_ptr<InstrumentPhysics::Hammer> hammer;
+    std::shared_ptr<InstrumentPhysics::Rigidbody> hammer;
 
 	std::unique_ptr<InstrumentPhysics::Simulation> simulation;
 

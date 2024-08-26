@@ -10,6 +10,9 @@
 
 #pragma once
 
+#include "Object.h"
+#include "PhysicsUtil.h"
+
 namespace InstrumentPhysics {
 
 	constexpr float PI = 3.14159265358979323846;
@@ -27,6 +30,8 @@ namespace InstrumentPhysics {
 
 		float sampleU(float x, float t) const;
 		void applyImpulse(float x, float t, float J);
+
+		Transform transform;
 
 	private:
 		float L, tension, mass, rho, ESK2, B, c, f0;
