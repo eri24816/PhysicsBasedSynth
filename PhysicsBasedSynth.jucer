@@ -44,6 +44,11 @@
       </GROUP>
     </GROUP>
     <GROUP id="{9A49C777-E63D-FDF6-E7BE-B1031F3C0961}" name="Source">
+      <GROUP id="{FFBCF1CE-1197-400C-2CC8-D1E60E0A08D1}" name="GUI">
+        <FILE id="QAdTed" name="StringParam.cpp" compile="1" resource="0" file="Source/GUI/StringParam.cpp"/>
+        <FILE id="FjiVMv" name="StringParam.h" compile="0" resource="0" file="Source/GUI/StringParam.h"/>
+        <FILE id="mQzY51" name="Util.h" compile="0" resource="0" file="Source/GUI/Util.h"/>
+      </GROUP>
       <GROUP id="{8BF7A99D-669C-6965-25A5-DCC4701E1ACC}" name="InstrumentPhysics">
         <FILE id="JljuVQ" name="PhysicsUtil.cpp" compile="1" resource="0" file="Source/PhysicsUtil.cpp"/>
         <FILE id="XMa5uh" name="PhysicsUtil.h" compile="0" resource="0" file="Source/PhysicsUtil.h"/>

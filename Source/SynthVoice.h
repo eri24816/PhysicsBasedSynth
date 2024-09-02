@@ -27,6 +27,18 @@ public:
     {
         return dynamic_cast <SynthSound*>(sound) != nullptr;
     }
+
+	void setValueTree(AudioProcessorValueTreeState& valueTree)
+	{
+		this->valueTree = &valueTree;
+	}
+
+
+    float calculateStringTension(float frequency, float density, float length, float stiffness)
+    {
+        float pi_stiffness_div_L = InstrumentPhysics::PI * stiffness / length;
+        return 4 * frequency * frequency * density * length * length - pi_stiffness_div_L * pi_stiffness_div_L;
+    }
     
     void startNote (int midiNoteNumber, float velocity, SynthesiserSound* sound, int currentPitchWheelPosition) override
     {
@@ -34,13 +46,37 @@ public:
         this->velocity = velocity;
         frequency = MidiMessage::getMidiNoteInHertz(midiNoteNumber);
 
+        float stringLength = getParam("string_length");
+		float stringDensity = getParam("string_density");
+		float stringStiffness = getParam("string_stiffness");
+
+        float stringTension = calculateStringTension(frequency, stringDensity, stringLength, stringStiffness);
+
+		Logger::getCurrentLogger()->writeToLog("freq: " + String(frequency));
+		Logger::getCurrentLogger()->writeToLog("String tension: " + String(stringTension));
+		Logger::getCurrentLogger()->writeToLog("String length: " + String(stringLength));
+		Logger::getCurrentLogger()->writeToLog("String density: " + String(stringDensity));
+		Logger::getCurrentLogger()->writeToLog("String stiffness: " + String(stringStiffness));
+
+		Logger::getCurrentLogger()->writeToLog("freq_2: " + String(std::sqrt(stringTension / stringDensity) / (2 * stringLength)));
+
 		simulation = std::make_unique<InstrumentPhysics::Simulation>();
-		string = std::make_shared<InstrumentPhysics::String>(200.0 / frequency, 8000, 0.0324, 0, 10, 0.7);
-		hammer = std::make_shared<InstrumentPhysics::Rigidbody>(0.05, InstrumentPhysics::Transform(0.1, 0.001));
+		string = std::make_shared<InstrumentPhysics::String>(stringLength, stringTension, stringDensity,
+            stringStiffness,
+            (int)getParam("string_harmonics"),
+			getParam("string_damping"));
+        hammer = std::make_shared<InstrumentPhysics::Rigidbody>(getParam("hammer_mass"),
+            InstrumentPhysics::Transform(getParam("hammer_position"),
+                0.001));
 		simulation->addObject(string);
 		simulation->addObject(hammer);
 
-		string->applyImpulse(0.1, 0, 0.1);
+        simulation->addInteraction(std::make_shared<InstrumentPhysics::HammerStringInteraction>(hammer, InstrumentPhysics::Vector2<float>{0, 0}, string, getParam(
+            "hammer_youngs_modulus")));
+
+		// give hammer a initial speed
+		hammer->applyImpulse(InstrumentPhysics::Vector2<float>{0, 0}, 0, InstrumentPhysics::Vector2<float>{0,-getParam("hammer_mass") * 
+			getParam("hammer_velocity") * 1});
     }
     
     void stopNote (float velocity, bool allowTailOff) override
@@ -74,11 +110,11 @@ public:
             }
             return;
         }
-		const float dt = 1.0f / 44100.0f;
+        const float dt = 1.0f / this->getSampleRate();
         for (int sample = 0; sample < numSamples; ++sample)
         {
 			simulation->update(dt);
-            const float currentSample = string->sampleU(0.01, simulation->getTime()) * 100;
+            const float currentSample = string->sampleU(0.01, simulation->getTime()) * 5;
             for (int channel = 0; channel < outputBuffer.getNumChannels(); ++channel)
             {
 				outputBuffer.addSample(channel, startSample, currentSample);
@@ -88,6 +124,9 @@ public:
     }
 
 private:
+
+	AudioProcessorValueTreeState* valueTree;
+
     int pitch;
     double velocity;
     double frequency;
@@ -98,4 +137,8 @@ private:
 
 	std::unique_ptr<InstrumentPhysics::Simulation> simulation;
 
+	float getParam(String paramId)
+	{
+		return *valueTree->getRawParameterValue(paramId);
+	}
 };

@@ -10,9 +10,8 @@
 
 #include <JuceHeader.h>
 #include "PluginProcessor.h"
-#include "Oscillator.h"
-#include "Envelope.h"
-#include "Filter.h"
+
+#include "GUI/StringParam.h"
 
 //==============================================================================
 /**
@@ -31,9 +30,7 @@ private:
     // This reference is provided as a quick way for your editor to
     // access the processor object that created it.
     PhysicsBasedSynthAudioProcessor& audioProcessor;
-    Oscillator oscGui;
-    Envelope envGui;
-    Filter filterGui;
+	SliderGroup stringParamComponent, hammerParamComponent;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PhysicsBasedSynthAudioProcessorEditor)
 };

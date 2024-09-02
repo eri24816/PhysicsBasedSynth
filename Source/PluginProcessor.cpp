@@ -31,8 +31,11 @@ PhysicsBasedSynthAudioProcessor::PhysicsBasedSynthAudioProcessor()
 
     for (int i = 0; i < 5; i++)
     {
-        mySynth.addVoice(new SynthVoice());
+        auto voice = new SynthVoice();
+        voice->setValueTree(valueTree);
+        mySynth.addVoice(voice);
     }
+
 
     mySynth.clearSounds();
     mySynth.addSound(new SynthSound());
@@ -219,14 +222,24 @@ AudioProcessorValueTreeState::ParameterLayout PhysicsBasedSynthAudioProcessor::c
 {
     std::vector<std::unique_ptr<RangedAudioParameter>> params;
 
-    params.push_back(std::make_unique<AudioParameterFloat>("ATTACK", "Attack", 0.1f, 5000.0f, 0.1f));
-    params.push_back(std::make_unique<AudioParameterFloat>("DECAY", "Decay", 1.0f, 2000.0f, 1.0f));
-    params.push_back(std::make_unique<AudioParameterFloat>("SUSTAIN", "Sustain", 0.0f, 1.0f, 0.8f));
-    params.push_back(std::make_unique<AudioParameterFloat>("RELEASE", "Release", 0.1f, 5000.0f, 0.1f));
-    params.push_back(std::make_unique<AudioParameterInt>("WAVEFORM", "Waveform", 0, 2, 0));
-    params.push_back(std::make_unique<AudioParameterFloat>("FILTER_CUTOFF", "FilterCutoff", 2.0f, 10000.0f, 400.0f));
-    params.push_back(std::make_unique<AudioParameterFloat>("FILTER_RESONANCE", "FilterResonance", 1.0f, 5.0f, 1.0f));
-    params.push_back(std::make_unique<AudioParameterInt>("FILTER_TYPE", "FilterType", 0, 2, 0));
+	// general parameters
+    // gain
+	params.push_back(std::make_unique<AudioParameterFloat>("gain", "Gain", 0.0f, 1.0f, 0.5f));
+	
+	// string parameters
+	// length, density, stiffness, damping, number of harmonics (tension is derived from these)
+	params.push_back(std::make_unique<AudioParameterFloat>("string_length", "String Length", 0.2, 1.0, 0.5));
+	params.push_back(std::make_unique<AudioParameterFloat>("string_density", "String Density", 0.01, 0.1, 0.03));
+	params.push_back(std::make_unique<AudioParameterFloat>("string_stiffness", "String Stiffness", 0, 1.0,0.1));
+	params.push_back(std::make_unique<AudioParameterFloat>("string_damping", "String Damping", 0.1f, 10.0f, 1.0f));
+	params.push_back(std::make_unique<AudioParameterInt>("string_harmonics", "String Harmonics", 0,50,10));
+
+	// hammer parameters
+	// mass, position, velocity
+	params.push_back(std::make_unique<AudioParameterFloat>("hammer_mass", "Hammer Mass", 0.01f, 0.2f, 0.05f));
+	params.push_back(std::make_unique<AudioParameterFloat>("hammer_position", "Hammer Position", 0, 1.0f, 0.1));
+	params.push_back(std::make_unique<AudioParameterFloat>("hammer_velocity", "Hammer Velocity", 0.1f, 10.0f, 3));
+	params.push_back(std::make_unique<AudioParameterFloat>("hammer_youngs_modulus", "Hammer Young's Modulus", 500000, 8000000, 2000000));
 
     return { params.begin(), params.end() };
 }
