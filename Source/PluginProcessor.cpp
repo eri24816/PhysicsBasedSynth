@@ -224,7 +224,7 @@ AudioProcessorValueTreeState::ParameterLayout PhysicsBasedSynthAudioProcessor::c
 
 	// general parameters
     // gain
-	params.push_back(std::make_unique<AudioParameterFloat>("gain", "Gain", 0.0f, 1.0f, 0.5f));
+	params.push_back(std::make_unique<AudioParameterFloat>("gain", "Gain", 0.0f, 2.0f, 1));
 	
 	// string parameters
 	// length, density, stiffness, damping, number of harmonics (tension is derived from these)
@@ -236,10 +236,10 @@ AudioProcessorValueTreeState::ParameterLayout PhysicsBasedSynthAudioProcessor::c
 
 	// hammer parameters
 	// mass, position, velocity
-	params.push_back(std::make_unique<AudioParameterFloat>("hammer_mass", "Hammer Mass", 0.01f, 0.2f, 0.05f));
+	params.push_back(std::make_unique<AudioParameterFloat>("hammer_mass", "Hammer Mass", 0.0001, 0.005, 0.001));
 	params.push_back(std::make_unique<AudioParameterFloat>("hammer_position", "Hammer Position", 0, 1.0f, 0.1));
 	params.push_back(std::make_unique<AudioParameterFloat>("hammer_velocity", "Hammer Velocity", 0.1f, 10.0f, 3));
-	params.push_back(std::make_unique<AudioParameterFloat>("hammer_youngs_modulus", "Hammer Young's Modulus", 500000, 8000000, 2000000));
+	params.push_back(std::make_unique<AudioParameterFloat>("hammer_youngs_modulus", "Hammer Young's Modulus", 200000, 8000000, 2000000));
 
     return { params.begin(), params.end() };
 }

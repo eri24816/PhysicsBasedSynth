@@ -53,18 +53,15 @@ public:
         float stringTension = calculateStringTension(frequency, stringDensity, stringLength, stringStiffness);
 
 		Logger::getCurrentLogger()->writeToLog("freq: " + String(frequency));
-		Logger::getCurrentLogger()->writeToLog("String tension: " + String(stringTension));
-		Logger::getCurrentLogger()->writeToLog("String length: " + String(stringLength));
-		Logger::getCurrentLogger()->writeToLog("String density: " + String(stringDensity));
-		Logger::getCurrentLogger()->writeToLog("String stiffness: " + String(stringStiffness));
 
-		Logger::getCurrentLogger()->writeToLog("freq_2: " + String(std::sqrt(stringTension / stringDensity) / (2 * stringLength)));
 
 		simulation = std::make_unique<InstrumentPhysics::Simulation>();
-		string = std::make_shared<InstrumentPhysics::String>(stringLength, stringTension, stringDensity,
+		/*string = std::make_shared<InstrumentPhysics::String>(stringLength, stringTension, stringDensity,
             stringStiffness,
             (int)getParam("string_harmonics"),
-			getParam("string_damping"));
+			getParam("string_damping"));*/
+
+		string = std::make_shared<InstrumentPhysics::String>(stringProfile->getProfile(midiNoteNumber));
         hammer = std::make_shared<InstrumentPhysics::Rigidbody>(getParam("hammer_mass"),
             InstrumentPhysics::Transform(getParam("hammer_position"),
                 0.001));
@@ -111,10 +108,11 @@ public:
             return;
         }
         const float dt = 1.0f / this->getSampleRate();
+		const float gain = getParam("gain");
         for (int sample = 0; sample < numSamples; ++sample)
         {
 			simulation->update(dt);
-            const float currentSample = string->sampleU(0.01, simulation->getTime()) * 5;
+            const float currentSample = string->sampleU(0.01, simulation->getTime()) * 0.1 * gain;
             for (int channel = 0; channel < outputBuffer.getNumChannels(); ++channel)
             {
 				outputBuffer.addSample(channel, startSample, currentSample);
@@ -131,6 +129,8 @@ private:
     double velocity;
     double frequency;
     
+	std::unique_ptr<InstrumentPhysics::StringProfile> stringProfile = std::make_unique<InstrumentPhysics::GrandPianoStringProfile>();
+
 	// objects are shared with simulation
     std::shared_ptr<InstrumentPhysics::String> string;
     std::shared_ptr<InstrumentPhysics::Rigidbody> hammer;

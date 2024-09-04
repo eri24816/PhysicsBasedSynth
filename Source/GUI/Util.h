@@ -13,6 +13,7 @@
 #include <JuceHeader.h>
 #include "../PluginProcessor.h"
 #include <memory>
+#include <cmath>
 
 using namespace juce;
 
@@ -33,7 +34,8 @@ public:
         auto param = audioProcessor.valueTree.getParameter(paramId);
 		RangedAudioParameter* rangedParam = dynamic_cast<RangedAudioParameter*>(param);
 		auto temp = rangedParam->getNormalisableRange();
-		slider.setRange(rangedParam->getNormalisableRange().start, rangedParam->getNormalisableRange().end, rangedParam->getNormalisableRange().interval);
+		slider.setRange(rangedParam->getNormalisableRange().start, rangedParam->getNormalisableRange().end, 
+			std::max(std::abs(rangedParam->getNormalisableRange().start), abs(rangedParam->getNormalisableRange().end)) / 100.0);
 
         slider.setSliderStyle(juce::Slider::SliderStyle::RotaryVerticalDrag);
 

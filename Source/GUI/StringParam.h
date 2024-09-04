@@ -47,13 +47,14 @@ public:
 	{
 		juce::FlexBox fb;
 		fb.flexWrap = juce::FlexBox::Wrap::wrap;
+		fb.alignItems = juce::FlexBox::AlignItems::stretch;
 		fb.justifyContent = juce::FlexBox::JustifyContent::center;
-		fb.alignContent = juce::FlexBox::AlignContent::center;
+		fb.alignContent = juce::FlexBox::AlignContent::stretch;
 
 		
 		for (SliderWithName* slider : sliders)
 		{
-			fb.items.add(juce::FlexItem(*slider).withMinWidth(130).withMinHeight(180).withMargin(20));
+			fb.items.add(juce::FlexItem(*slider).withMinWidth(100).withMinHeight(140).withMargin(20).withFlex(1));
 		}
 
 		fb.performLayout(getLocalBounds());

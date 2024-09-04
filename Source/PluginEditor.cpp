@@ -11,7 +11,11 @@
 
 //==============================================================================
 PhysicsBasedSynthAudioProcessorEditor::PhysicsBasedSynthAudioProcessorEditor (PhysicsBasedSynthAudioProcessor& p)
-	: AudioProcessorEditor(&p), audioProcessor(p), stringParamComponent(p, "String",{
+	: AudioProcessorEditor(&p), audioProcessor(p), 
+	mainParamComponent(p, "Main", {
+		{"Gain", "gain"},
+		}),
+	stringParamComponent(p, "String",{
 		{"String Length 123", "string_length"},
 		{"String Density", "string_density"},
 		{"String Stiffness", "string_stiffness"},
@@ -27,7 +31,7 @@ PhysicsBasedSynthAudioProcessorEditor::PhysicsBasedSynthAudioProcessorEditor (Ph
 {
 	setSize(1000, 700);
 	
-
+	addAndMakeVisible(mainParamComponent);
 	addAndMakeVisible(stringParamComponent);
 	addAndMakeVisible(hammerParamComponent);
 }
@@ -50,8 +54,9 @@ void PhysicsBasedSynthAudioProcessorEditor::resized()
     Rectangle<int> area = getLocalBounds();
 
 	juce::FlexBox fb;
-	fb.flexDirection = FlexBox::Direction::column;
+	fb.flexDirection = FlexBox::Direction::row;
 
+	fb.items.add(FlexItem(mainParamComponent).withFlex(1).withMargin(5));
 	fb.items.add(FlexItem(stringParamComponent).withFlex(1).withMargin(5));
 	fb.items.add(FlexItem(hammerParamComponent).withFlex(1).withMargin(5));
 

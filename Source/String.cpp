@@ -9,6 +9,7 @@
 */
 
 #include "String.h"
+#include "JuceHeader.h"
 #include <cmath>
 #include <stdexcept>
 
@@ -36,6 +37,13 @@ namespace InstrumentPhysics {
 			a[n] = 0;
 			b[n] = 0;
 		}
+
+
+		juce::Logger::writeToLog("String tension: " + juce::String(tension));
+		juce::Logger::writeToLog("String density: " + juce::String(rho));
+		juce::Logger::writeToLog("String stiffness: " + juce::String(ESK2));
+		juce::Logger::writeToLog("String length: " + juce::String(L));
+		juce::Logger::writeToLog("String f0: " + juce::String(f0));
 	}
 
 	float String::sampleU(float x, float t) const
