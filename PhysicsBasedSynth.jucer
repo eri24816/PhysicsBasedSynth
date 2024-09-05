@@ -48,6 +48,8 @@
         <FILE id="QAdTed" name="StringParam.cpp" compile="1" resource="0" file="Source/GUI/StringParam.cpp"/>
         <FILE id="FjiVMv" name="StringParam.h" compile="0" resource="0" file="Source/GUI/StringParam.h"/>
         <FILE id="mQzY51" name="Util.h" compile="0" resource="0" file="Source/GUI/Util.h"/>
+        <FILE id="eJosyY" name="Visualizer.cpp" compile="1" resource="0" file="Source/GUI/Visualizer.cpp"/>
+        <FILE id="VNznee" name="Visualizer.h" compile="0" resource="0" file="Source/GUI/Visualizer.h"/>
       </GROUP>
       <GROUP id="{8BF7A99D-669C-6965-25A5-DCC4701E1ACC}" name="InstrumentPhysics">
         <FILE id="JljuVQ" name="PhysicsUtil.cpp" compile="1" resource="0" file="Source/PhysicsUtil.cpp"/>

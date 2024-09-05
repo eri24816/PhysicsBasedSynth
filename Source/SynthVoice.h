@@ -72,7 +72,7 @@ public:
             "hammer_youngs_modulus")));
 
 		// give hammer a initial speed
-		hammer->applyImpulse(InstrumentPhysics::Vector2<float>{0, 0}, 0, InstrumentPhysics::Vector2<float>{0,-getParam("hammer_mass") * 
+		hammer->applyImpulse(InstrumentPhysics::Vector2<float>{0, 0}, InstrumentPhysics::Vector2<float>{0,-getParam("hammer_mass") * 
 			getParam("hammer_velocity") * 1});
     }
     
@@ -112,7 +112,7 @@ public:
         for (int sample = 0; sample < numSamples; ++sample)
         {
 			simulation->update(dt);
-            const float currentSample = string->sampleU(0.01, simulation->getTime()) * 0.1 * gain;
+            const float currentSample = string->sampleU(0.01) * 0.1 * gain;
             for (int channel = 0; channel < outputBuffer.getNumChannels(); ++channel)
             {
 				outputBuffer.addSample(channel, startSample, currentSample);
@@ -120,6 +120,11 @@ public:
             ++startSample;
         }
     }
+
+
+    // objects are shared with simulation
+    std::shared_ptr<InstrumentPhysics::String> string;
+    std::shared_ptr<InstrumentPhysics::Rigidbody> hammer;
 
 private:
 
@@ -131,9 +136,6 @@ private:
     
 	std::unique_ptr<InstrumentPhysics::StringProfile> stringProfile = std::make_unique<InstrumentPhysics::GrandPianoStringProfile>();
 
-	// objects are shared with simulation
-    std::shared_ptr<InstrumentPhysics::String> string;
-    std::shared_ptr<InstrumentPhysics::Rigidbody> hammer;
 
 	std::unique_ptr<InstrumentPhysics::Simulation> simulation;
 

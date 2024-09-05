@@ -42,8 +42,8 @@ namespace InstrumentPhysics
 			Vector2<float> relPos = hammer->transform.getWorldPos() - string->transform.getWorldPos();
 			if (relPos.y < 0.0f) {
 				auto impulse = -relPos.y * youngsModulus;
-				string->applyImpulse(relPos.x, t, impulse);
-				hammer->applyImpulse(-relPos, t, Vector2<float>{0.0f, impulse});
+				string->applyImpulse(relPos.x, impulse);
+				hammer->applyImpulse(-relPos, Vector2<float>{0.0f, impulse});
 			}
 		}
 	};

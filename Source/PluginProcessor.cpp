@@ -156,33 +156,6 @@ void PhysicsBasedSynthAudioProcessor::processBlock (juce::AudioBuffer<float>& bu
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear (i, 0, buffer.getNumSamples());
 
-    //for (int i = 0; i < mySynth.getNumVoices(); i++)
-    //{
-    //    if ((myVoice = dynamic_cast<SynthVoice*>(mySynth.getVoice(i))))
-    //    {
-    //        auto attackValue = valueTree.getRawParameterValue("ATTACK");
-    //        auto decayValue = valueTree.getRawParameterValue("DECAY");
-    //        auto sustainValue = valueTree.getRawParameterValue("SUSTAIN");
-    //        auto releaseValue = valueTree.getRawParameterValue("RELEASE");
-
-    //        myVoice->getEnvelope(attackValue->load(),
-    //            decayValue->load(),
-    //            sustainValue->load(),
-    //            releaseValue->load());
-
-    //        auto waveformValue = valueTree.getRawParameterValue("WAVEFORM");
-
-    //        myVoice->getOscWaveform(waveformValue->load());
-
-    //        auto filterTypeValue = valueTree.getRawParameterValue("FILTER_TYPE");
-    //        auto filterCutoffValue = valueTree.getRawParameterValue("FILTER_CUTOFF");
-    //        auto filterResonanceValue = valueTree.getRawParameterValue("FILTER_RESONANCE");
-
-    //        myVoice->getFilter(filterTypeValue->load(), filterCutoffValue->load(), filterResonanceValue->load());
-    //    }
-    //}
-
-    buffer.clear();
     mySynth.renderNextBlock(buffer, midiMessages, 0, buffer.getNumSamples());
 }
 
@@ -236,10 +209,16 @@ AudioProcessorValueTreeState::ParameterLayout PhysicsBasedSynthAudioProcessor::c
 
 	// hammer parameters
 	// mass, position, velocity
-	params.push_back(std::make_unique<AudioParameterFloat>("hammer_mass", "Hammer Mass", 0.0001, 0.005, 0.001));
+	params.push_back(std::make_unique<AudioParameterFloat>("hammer_mass", "Hammer Mass (g)", 0.1, 5, 1));
 	params.push_back(std::make_unique<AudioParameterFloat>("hammer_position", "Hammer Position", 0, 1.0f, 0.1));
 	params.push_back(std::make_unique<AudioParameterFloat>("hammer_velocity", "Hammer Velocity", 0.1f, 10.0f, 3));
 	params.push_back(std::make_unique<AudioParameterFloat>("hammer_youngs_modulus", "Hammer Young's Modulus", 200000, 8000000, 2000000));
+
+    // visualizing parameters
+	// x scale, y scale, time scale
+	params.push_back(std::make_unique<AudioParameterFloat>("visualizer_x_scale", "Visualizer X Scale", 0.1, 10.0, 1.0));
+	params.push_back(std::make_unique<AudioParameterFloat>("visualizer_y_scale", "Visualizer Y Scale", 0.1, 10.0, 1.0));
+	params.push_back(std::make_unique<AudioParameterFloat>("visualizer_time_scale", "Visualizer Time Scale", 0.001, 1.0, 0.001));
 
     return { params.begin(), params.end() };
 }

@@ -26,7 +26,7 @@ namespace InstrumentPhysics
 		float mass;
 		Transform transform;
 		Vector2<float> vel;
-		void applyImpulse(Vector2<float> pos, float t, Vector2<float> impulse);
+		void applyImpulse(Vector2<float> pos, Vector2<float> impulse);
 	};
 
 };

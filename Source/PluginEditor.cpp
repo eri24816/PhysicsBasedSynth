@@ -16,24 +16,32 @@ PhysicsBasedSynthAudioProcessorEditor::PhysicsBasedSynthAudioProcessorEditor (Ph
 		{"Gain", "gain"},
 		}),
 	stringParamComponent(p, "String",{
-		{"String Length 123", "string_length"},
+		{"String Length", "string_length"},
 		{"String Density", "string_density"},
 		{"String Stiffness", "string_stiffness"},
 		{"String Harmonics", "string_harmonics"},
 		{"String Damping", "string_damping"},
 		}),
 	hammerParamComponent(p, "Hammer", {
-		{"Hammer Mass", "hammer_mass"},
+		{"Hammer Mass (g)", "hammer_mass"},
 		{"Hammer Position", "hammer_position"},
 		{"Hammer Velocity", "hammer_velocity"},
 		{"Hammer Young's Modulus", "hammer_youngs_modulus"}
-		})
+		}),
+	visualParamComponent(p, "Visual", {
+		{"X Scale", "visualizer_x_scale"},
+		{"Y Scale", "visualizer_y_scale"},
+		{"Time Scale", "visualizer_time_scale"}
+		}),
+	visualizer(p.valueTree)
 {
 	setSize(1000, 700);
 	
 	addAndMakeVisible(mainParamComponent);
 	addAndMakeVisible(stringParamComponent);
 	addAndMakeVisible(hammerParamComponent);
+	addAndMakeVisible(visualParamComponent);
+	addAndMakeVisible(visualizer);
 }
 
 PhysicsBasedSynthAudioProcessorEditor::~PhysicsBasedSynthAudioProcessorEditor()
@@ -60,5 +68,8 @@ void PhysicsBasedSynthAudioProcessorEditor::resized()
 	fb.items.add(FlexItem(stringParamComponent).withFlex(1).withMargin(5));
 	fb.items.add(FlexItem(hammerParamComponent).withFlex(1).withMargin(5));
 
-	fb.performLayout(area);
+	fb.performLayout(area.removeFromTop(area.getHeight() * 0.7));
+
+	visualParamComponent.setBounds(area.removeFromLeft(area.getWidth() * 0.3));
+	visualizer.setBounds(area.reduced(10));
 }

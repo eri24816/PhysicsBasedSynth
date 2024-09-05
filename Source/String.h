@@ -34,13 +34,15 @@ namespace InstrumentPhysics {
 		float a[STRING_MAX_HARMONICS + 1] = { 0 };
 		float b[STRING_MAX_HARMONICS + 1] = { 0 };
 
-		float sampleU(float x, float t) const;
+		float sampleU(float x) const;
 		void update(float t, float dt) override;
-		void applyImpulse(float x, float t, float J);
+		void applyImpulse(float x, float J);
+		float getLength() const { return L; }
 
 		Transform transform;
 
 	private:
+		float t = 0;
 		float L, tension, rho, ESK2, B, c, f0, damping;
 		int nHarmonics;
 		float harmonicFreqs[STRING_MAX_HARMONICS + 1] = { 0 };

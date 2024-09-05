@@ -46,7 +46,7 @@ namespace InstrumentPhysics {
 		juce::Logger::writeToLog("String f0: " + juce::String(f0));
 	}
 
-	float String::sampleU(float x, float t) const
+	float String::sampleU(float x) const
 	{
 		float u = 0;
 		for (int n = 1; n <= nHarmonics; n++)
@@ -60,6 +60,8 @@ namespace InstrumentPhysics {
 
 	void String::update(float t, float dt)
 	{
+		// A String have to store the time to have a complete state
+		this->t = t;
 		// TODO: use a physical damping model
 		if (damping!=0) {
 			for (int n = 1; n <= nHarmonics; n++)
@@ -70,7 +72,7 @@ namespace InstrumentPhysics {
 		}
 	}
 
-	void String::applyImpulse(float x, float t, float J)
+	void String::applyImpulse(float x, float J)
 	{
 		for (int n = 1; n <= nHarmonics; n++)
 		{

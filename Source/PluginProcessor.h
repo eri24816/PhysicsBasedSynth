@@ -59,7 +59,6 @@ public:
 
 private:
     juce::Synthesiser mySynth;
-    SynthVoice* myVoice;
 
     double lastSampleRate;
 

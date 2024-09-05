@@ -24,7 +24,7 @@ namespace InstrumentPhysics
 		transform.localPos = transform.localPos + vel * dt;
 	}
 
-	void Rigidbody::applyImpulse(Vector2<float> pos, float t, Vector2<float> impulse)
+	void Rigidbody::applyImpulse(Vector2<float> pos, Vector2<float> impulse)
 	{
 		// pos will be used when rotation is implemented
 		vel = vel + impulse / mass;
