@@ -54,7 +54,7 @@ public:
 		
 		for (SliderWithName* slider : sliders)
 		{
-			fb.items.add(juce::FlexItem(*slider).withMinWidth(80).withMinHeight(90).withMargin(20).withFlex(1));
+			fb.items.add(juce::FlexItem(*slider).withMinWidth(70).withMinHeight(90).withMargin(10).withFlex(1));
 		}
 
 		fb.performLayout(getLocalBounds());

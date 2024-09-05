@@ -42,6 +42,26 @@ public:
 		t = 0;
 	}
 
+	float toObjX(float x) {
+		float xScale = params.getRawParameterValue("visualizer_x_scale")->load();
+		return (x / (float)getWidth() - 0.5) * xScale + voiceForVisual.string->getLength() / 2;
+	}
+
+	float toScreenX(float x) {
+		float xScale = params.getRawParameterValue("visualizer_x_scale")->load();
+		return (x - voiceForVisual.string->getLength() / 2) / xScale * getWidth() + getWidth() / 2;
+	}
+
+	float toScreenY(float y) {
+		float yScale = params.getRawParameterValue("visualizer_y_scale")->load();
+		return getHeight() / 2 - getHeight() * yScale * y / 2;
+	}
+
+	float toObjY(float y) {
+		float yScale = params.getRawParameterValue("visualizer_y_scale")->load();
+		return 2 * (-y - getHeight() / 2) / getHeight() / yScale;
+	}
+
 	void paint(Graphics& g) override {
 		float timeScale = params.getRawParameterValue("visualizer_time_scale")->load();
 		float originalRate = voiceForVisual.getSampleRate();
@@ -58,21 +78,41 @@ public:
 		g.setColour(Colours::grey);
 		g.drawRoundedRectangle(getLocalBounds().toFloat(), 10, 2);
 
-		std::vector<std::shared_ptr<InstrumentPhysics::String>> strings{ voiceForVisual.string };
 		float xScale = params.getRawParameterValue("visualizer_x_scale")->load();
 		float yScale = params.getRawParameterValue("visualizer_y_scale")->load();
+
+		// draw string
+		std::vector<std::shared_ptr<InstrumentPhysics::String>> strings{ voiceForVisual.string };
 		for (auto& string : strings) {
 			Path p;
-			p.startNewSubPath(0, getHeight() / 2);
+			bool started = false;
 			for (int i = 0; i < getWidth(); i++) {
-				float x = (i / (float)getWidth() - 0.5) * xScale + string->getLength() / 2;
+				float x = toObjX(i);
 				if (x < 0) continue;
 				if (x > string->getLength()) break;
 				
-				p.lineTo(i, getHeight()/2 + getHeight() * params.getRawParameterValue("visualizer_y_scale")->load() * (string->sampleU(x))/2);
+				float j = toScreenY(string->sampleU(x));
+				if (!started) {
+					p.startNewSubPath(i, j);
+					started = true;
+				}
+				else {
+					p.lineTo(i, j);
+				}
 			}
 			g.strokePath(p, PathStrokeType(2));
 		}
+
+		// draw hammer
+
+		auto hammer = voiceForVisual.hammer;
+		float hammerX = toScreenX(hammer->transform.getWorldPos().x);
+		float hammerY = toScreenY(hammer->transform.getWorldPos().y);
+		g.setColour(Colours::red);
+		g.fillEllipse(hammerX, hammerY, 10, 10);
+		g.setColour(Colours::black);
+		g.drawEllipse(hammerX, hammerY, 10, 10, 2);
+
 	}
 
 	void timerCallback() override

@@ -40,10 +40,10 @@ namespace InstrumentPhysics
 		void apply(float t, float dt) override
 		{
 			Vector2<float> relPos = hammer->transform.getWorldPos() - string->transform.getWorldPos();
-			if (relPos.y < 0.0f) {
-				auto impulse = -relPos.y * youngsModulus;
+ 			if (relPos.y > 0.0f) {
+				auto impulse = relPos.y * youngsModulus * dt;
 				string->applyImpulse(relPos.x, impulse);
-				hammer->applyImpulse(-relPos, Vector2<float>{0.0f, impulse});
+				hammer->applyImpulse(-relPos, Vector2<float>{0.0f, -impulse});
 			}
 		}
 	};

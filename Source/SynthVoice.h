@@ -62,9 +62,9 @@ public:
 			getParam("string_damping"));*/
 
 		string = std::make_shared<InstrumentPhysics::String>(stringProfile->getProfile(midiNoteNumber));
-        hammer = std::make_shared<InstrumentPhysics::Rigidbody>(getParam("hammer_mass"),
+		hammer = std::make_shared<InstrumentPhysics::Rigidbody>(getParam("hammer_mass") * 0.001, // g to kg
             InstrumentPhysics::Transform(getParam("hammer_position"),
-                0.001));
+                -0.001));
 		simulation->addObject(string);
 		simulation->addObject(hammer);
 
@@ -72,7 +72,7 @@ public:
             "hammer_youngs_modulus")));
 
 		// give hammer a initial speed
-		hammer->applyImpulse(InstrumentPhysics::Vector2<float>{0, 0}, InstrumentPhysics::Vector2<float>{0,-getParam("hammer_mass") * 
+		hammer->applyImpulse(InstrumentPhysics::Vector2<float>{0, 0}, InstrumentPhysics::Vector2<float>{0,getParam("hammer_mass") * 
 			getParam("hammer_velocity") * 1});
     }
     

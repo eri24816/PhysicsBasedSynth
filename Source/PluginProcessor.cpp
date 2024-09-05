@@ -217,8 +217,8 @@ AudioProcessorValueTreeState::ParameterLayout PhysicsBasedSynthAudioProcessor::c
     // visualizing parameters
 	// x scale, y scale, time scale
 	params.push_back(std::make_unique<AudioParameterFloat>("visualizer_x_scale", "Visualizer X Scale", 0.1, 10.0, 1.0));
-	params.push_back(std::make_unique<AudioParameterFloat>("visualizer_y_scale", "Visualizer Y Scale", 0.1, 10.0, 1.0));
-	params.push_back(std::make_unique<AudioParameterFloat>("visualizer_time_scale", "Visualizer Time Scale", 0.001, 1.0, 0.001));
+	params.push_back(std::make_unique<AudioParameterFloat>("visualizer_y_scale", "Visualizer Y Scale", 0.01, 10.0, 1.0));
+	params.push_back(std::make_unique<AudioParameterFloat>("visualizer_time_scale", "Visualizer Time Scale", 0.0001, 1.0, 0.001));
 
     return { params.begin(), params.end() };
 }
