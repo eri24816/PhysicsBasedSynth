@@ -62,6 +62,10 @@ namespace InstrumentPhysics
 			return parent ? parent->getWorldPos() + localPos : localPos;
 		}
 
+		Transform createChild(Vector2<float> localPos) {
+			return Transform(this, localPos);
+		}
+
 	};
 
 }

@@ -49,11 +49,12 @@ namespace InstrumentPhysics {
 	float String::sampleU(float x) const
 	{
 		float u = 0;
+		float pi_x_div_L = PI * x / L;
 		for (int n = 1; n <= nHarmonics; n++)
 		{
-			const float xComp = std::sin(n * PI * x / L);
+			const float xComp = std::sin(n * pi_x_div_L);
 			const float omegaT = harmonicOmega[n] * t;
-			u += a[n] * std::cos(omegaT) * xComp + b[n] * std::sin(omegaT) * xComp;
+			u += (a[n] * std::cos(omegaT) + b[n] * std::sin(omegaT)) * xComp;
 		}
 		return u;
 	}
@@ -63,11 +64,12 @@ namespace InstrumentPhysics {
 		// A String have to store the time to have a complete state
 		this->t = t;
 		// TODO: use a physical damping model
-		if (damping!=0) {
+		if (damping != 0) {
 			for (int n = 1; n <= nHarmonics; n++)
 			{
-				a[n] *= std::exp(-damping*0.002 * dt * harmonicFreqs[n]);
-				b[n] *= std::exp(-damping*0.002 * dt * harmonicFreqs[n]);
+				float factor = std::exp(-damping * 0.002 * dt * harmonicFreqs[n]);
+				a[n] *= factor;
+				b[n] *= factor;
 			}
 		}
 	}
@@ -76,8 +78,6 @@ namespace InstrumentPhysics {
 	{
 		for (int n = 1; n <= nHarmonics; n++)
 		{
-			a[n] = 0;
-			b[n] = 0;
 			const float xComp = 2 * J / L / rho / harmonicOmega[n] * std::sin(n * PI * x / L);
 			const float omegaT = harmonicOmega[n] * t;
 

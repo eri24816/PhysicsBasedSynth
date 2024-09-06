@@ -18,6 +18,7 @@ using namespace juce;
 struct SliderSpec {
 	String name;
 	String paramId;
+	float skewFactor = 1;
 };
 
 class SliderGroup : public juce::GroupComponent
@@ -29,6 +30,7 @@ public:
 		for (SliderSpec spec : sliderSpecs)
 		{
 			auto slider = new SliderWithName(spec.name, audioProcessor, spec.paramId);
+			slider->slider.setSkewFactor(spec.skewFactor);
 			addAndMakeVisible(slider);
 			
 			sliders.push_back(slider);

@@ -201,24 +201,25 @@ AudioProcessorValueTreeState::ParameterLayout PhysicsBasedSynthAudioProcessor::c
 	
 	// string parameters
 	// length, density, stiffness, damping, number of harmonics (tension is derived from these)
-	params.push_back(std::make_unique<AudioParameterFloat>("string_length", "String Length", 0.2, 1.0, 0.5));
-	params.push_back(std::make_unique<AudioParameterFloat>("string_density", "String Density", 0.01, 0.1, 0.03));
-	params.push_back(std::make_unique<AudioParameterFloat>("string_stiffness", "String Stiffness", 0, 1.0,0.1));
-	params.push_back(std::make_unique<AudioParameterFloat>("string_damping", "String Damping", 0.1f, 10.0f, 1.0f));
-	params.push_back(std::make_unique<AudioParameterInt>("string_harmonics", "String Harmonics", 0,50,10));
+	params.push_back(std::make_unique<AudioParameterFloat>("string_length", "String Length", 0.1, 10.0, 1));
+	params.push_back(std::make_unique<AudioParameterFloat>("string_density", "String Density", 0.1, 10.0, 1));
+	params.push_back(std::make_unique<AudioParameterFloat>("string_stiffness", "String Stiffness", 0, 10.0, 1));
+	params.push_back(std::make_unique<AudioParameterFloat>("string_damping", "String Damping", 0, 10.0, 1));
+	params.push_back(std::make_unique<AudioParameterInt>("string_harmonics", "String Harmonics", 0,50,30));
 
 	// hammer parameters
 	// mass, position, velocity
-	params.push_back(std::make_unique<AudioParameterFloat>("hammer_mass", "Hammer Mass (g)", 0.1, 5, 1));
+	params.push_back(std::make_unique<AudioParameterFloat>("hammer_mass", "Hammer Mass (g)", 0.1, 20, 9));
 	params.push_back(std::make_unique<AudioParameterFloat>("hammer_position", "Hammer Position", 0, 1.0f, 0.1));
 	params.push_back(std::make_unique<AudioParameterFloat>("hammer_velocity", "Hammer Velocity", 0.1f, 10.0f, 3));
 	params.push_back(std::make_unique<AudioParameterFloat>("hammer_youngs_modulus", "Hammer Young's Modulus", 200000, 8000000, 2000000));
 
     // visualizing parameters
-	// x scale, y scale, time scale
+	// x scale, y scale, time scale, note
 	params.push_back(std::make_unique<AudioParameterFloat>("visualizer_x_scale", "Visualizer X Scale", 0.1, 10.0, 1.0));
-	params.push_back(std::make_unique<AudioParameterFloat>("visualizer_y_scale", "Visualizer Y Scale", 0.01, 10.0, 1.0));
-	params.push_back(std::make_unique<AudioParameterFloat>("visualizer_time_scale", "Visualizer Time Scale", 0.0001, 1.0, 0.001));
+	params.push_back(std::make_unique<AudioParameterFloat>("visualizer_y_scale", "Visualizer Y Scale", 1, 500.0, 100.0));
+	params.push_back(std::make_unique<AudioParameterFloat>("visualizer_time_scale", "Visualizer Time Scale", NormalisableRange<float>(0.0001, 1.0,0), 0.0001));
+	params.push_back(std::make_unique<AudioParameterInt>("visualizer_note", "Visualizer Note", 0, 127, 60));
 
     return { params.begin(), params.end() };
 }

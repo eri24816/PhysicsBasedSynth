@@ -39,11 +39,16 @@ namespace InstrumentPhysics
 
 		void apply(float t, float dt) override
 		{
-			Vector2<float> relPos = hammer->transform.getWorldPos() - string->transform.getWorldPos();
- 			if (relPos.y > 0.0f) {
-				auto impulse = relPos.y * youngsModulus * dt;
-				string->applyImpulse(relPos.x, impulse);
-				hammer->applyImpulse(-relPos, Vector2<float>{0.0f, -impulse});
+			// hammer pos relative to string origin
+			Vector2<float> posHS = hammer->transform.getWorldPos() - string->transform.getWorldPos();
+			// hammer pos relative to string hit point
+			Vector2<float> posHP = hammer->transform.getWorldPos() - 
+				string->transform.createChild(Vector2<float>{0.0f, string->sampleU(posHS.x)}).getWorldPos();
+			
+			if (posHP.y > 0){
+				auto impulse = posHP.y * youngsModulus * dt;
+				string->applyImpulse(posHS.x, impulse);
+				hammer->applyImpulse(Vector2<float>{0.0f, 0.0f}, Vector2<float>{0.0f, -impulse});
 			}
 		}
 	};

@@ -55,7 +55,7 @@ namespace InstrumentPhysics {
 
 	class StringProfile {
 	public:
-		virtual SingleStringProfile getProfile(int pitch) const = 0;
+		virtual SingleStringProfile getProfile(int pitch, float pLength, float pDensity, float pStiffness, float pDamping, float pHarmonics) const = 0;
 	};
 
 	class GrandPianoStringProfile : public StringProfile {
@@ -67,14 +67,17 @@ namespace InstrumentPhysics {
 			return 4 * frequency * frequency * density * length * length - pi_stiffness_div_L * pi_stiffness_div_L;
 		}
 
-		SingleStringProfile getProfile(int pitch) const override {
+		/*
+		Arguments starts with "p" are parameters that can be adjusted by the user.
+		*/
+		SingleStringProfile getProfile(int pitch, float pLength, float pDensity, float pStiffness, float pDamping, float pHarmonics) const override{
 			float frequency = 440 * std::pow(2.0, (pitch - 69) / 12.0);
-			float length = 0.657 * std::pow(1.91956, -(pitch - 60) / 12.0);
-			float density = 0.02792;
-			float stiffness = 2.67e-4;
+			float length = 0.657 * std::pow(1.91956, -(pitch - 60) / 12.0) * pLength;
+			float density = 0.02792 * pDensity;
+			float stiffness = 2.67e-4 * pStiffness;
 			float tension = calculateStringTension(frequency, density, length, stiffness);
-			float damping = 0.05;
-			return { length, tension, density, stiffness, damping, 30 };
+			float damping = 0.05 * pDamping;
+			return { length, tension, density, stiffness, damping, pHarmonics };
 		}
 	};
 }

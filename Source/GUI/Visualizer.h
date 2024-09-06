@@ -33,23 +33,44 @@ public:
 		reset();
 	}
 
+	~Visualizer() {
+		params.state.removeListener(this);
+	}
+
+	void printVT(ValueTree toPrint)
+	{
+		if (toPrint.hasProperty("xxxxxxxxxxxxxxxxxxxxxxxxxxxxx")) return;
+		static const Identifier printTest("xxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
+
+		toPrint.setProperty(printTest, "x", nullptr);
+
+		DBG(toPrint.getRoot().toXmlString());
+
+		toPrint.removeProperty(printTest, nullptr);
+	}
+
 	void valueTreePropertyChanged(ValueTree& treeWhosePropertyHasChanged, const Identifier& property) override {
+		// if param id is visualizer_x_scale, visualizer_y_scale, visualizer_time_scale, do nothing
+		String paramId = treeWhosePropertyHasChanged.getPropertyAsValue(Identifier("id"), nullptr).toString();
+
+		if (paramId == "visualizer_x_scale" || paramId == "visualizer_y_scale" || paramId == "visualizer_time_scale") return;
 		reset();
 	}
 
 	void reset() {
-		voiceForVisual.startNote(60, 1, nullptr, 0);
+		voiceForVisual.startNote(params.getRawParameterValue("visualizer_note")->load(), 100, nullptr, 0);
+		currentNote = params.getRawParameterValue("visualizer_note")->load();
 		t = 0;
 	}
 
 	float toObjX(float x) {
 		float xScale = params.getRawParameterValue("visualizer_x_scale")->load();
-		return (x / (float)getWidth() - 0.5) * xScale + voiceForVisual.string->getLength() / 2;
+		return (x / (float)getWidth() - 0.5) / xScale + voiceForVisual.string->getLength() / 2;
 	}
 
 	float toScreenX(float x) {
 		float xScale = params.getRawParameterValue("visualizer_x_scale")->load();
-		return (x - voiceForVisual.string->getLength() / 2) / xScale * getWidth() + getWidth() / 2;
+		return (x - voiceForVisual.string->getLength() / 2) * xScale * getWidth() + getWidth() / 2;
 	}
 
 	float toScreenY(float y) {
@@ -77,9 +98,6 @@ public:
 		g.fillRoundedRectangle(getLocalBounds().toFloat(), 10);
 		g.setColour(Colours::grey);
 		g.drawRoundedRectangle(getLocalBounds().toFloat(), 10, 2);
-
-		float xScale = params.getRawParameterValue("visualizer_x_scale")->load();
-		float yScale = params.getRawParameterValue("visualizer_y_scale")->load();
 
 		// draw string
 		std::vector<std::shared_ptr<InstrumentPhysics::String>> strings{ voiceForVisual.string };
@@ -113,6 +131,11 @@ public:
 		g.setColour(Colours::black);
 		g.drawEllipse(hammerX, hammerY, 10, 10, 2);
 
+		// write current time and note
+		g.setColour(Colours::white);
+		g.setFont(20);
+		g.drawText(String(((float)((int)((t*1000)*100)))/100) + "ms", 10, 10, 200, 20, Justification::left);
+		g.drawText(MidiMessage::getMidiNoteName(currentNote, true, true, 3) + " (" + String(currentNote)  + ")", 10, 30, 200, 20, Justification::left);
 	}
 
 	void timerCallback() override
@@ -127,4 +150,5 @@ private:
 	AudioBuffer<float> dummyBuffer;
 	AudioProcessorValueTreeState& params;
 	float t = 0;
+	int currentNote = 0;
 };

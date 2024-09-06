@@ -29,9 +29,10 @@ PhysicsBasedSynthAudioProcessorEditor::PhysicsBasedSynthAudioProcessorEditor (Ph
 		{"Hammer Young's Modulus", "hammer_youngs_modulus"}
 		}),
 	visualParamComponent(p, "Visual", {
-		{"X Scale", "visualizer_x_scale"},
-		{"Y Scale", "visualizer_y_scale"},
-		{"Time Scale", "visualizer_time_scale"}
+		{"X Scale", "visualizer_x_scale", 0.5},
+		{"Y Scale", "visualizer_y_scale", 0.5},
+		{"Time Scale", "visualizer_time_scale", 0.2},
+		{"Note", "visualizer_note"}
 		}),
 	visualizer(p.valueTree)
 {
