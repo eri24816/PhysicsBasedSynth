@@ -34,6 +34,7 @@ public:
 			addAndMakeVisible(slider);
 			
 			sliders.push_back(slider);
+			sliderMap[spec.paramId] = slider;
 		}
 	}
 
@@ -62,9 +63,15 @@ public:
 		fb.performLayout(getLocalBounds());
 	}
 
+	SliderWithName* getSlider(String paramId)
+	{
+		return sliderMap[paramId];
+	}
+
 private:
 	PhysicsBasedSynthAudioProcessor& audioProcessor;
 
 	std::vector<SliderWithName*> sliders;
+	std::map<String, SliderWithName*> sliderMap;
 
 };

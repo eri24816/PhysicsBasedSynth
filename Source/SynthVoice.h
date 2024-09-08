@@ -96,24 +96,9 @@ public:
     
     void renderNextBlock (AudioBuffer <float> &outputBuffer, int startSample, int numSamples) override
     {
-		// clear buffer
-        
-		for (int i = 0; i < outputBuffer.getNumChannels(); i++)
-		{
-			outputBuffer.clear(i, startSample, numSamples);
-		}
 
-
-		// fill 0 if there's no simulation
+		// do nothing if there's no simulation
         if (!simulation) {
-            for (int sample = 0; sample < numSamples; ++sample)
-            {
-                for (int channel = 0; channel < outputBuffer.getNumChannels(); ++channel)
-                {
-                    outputBuffer.addSample(channel, startSample, 0);
-                }
-                ++startSample;
-            }
             return;
         }
         const float dt = 1.0f / this->getSampleRate();

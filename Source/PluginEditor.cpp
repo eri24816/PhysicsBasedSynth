@@ -13,7 +13,7 @@
 PhysicsBasedSynthAudioProcessorEditor::PhysicsBasedSynthAudioProcessorEditor (PhysicsBasedSynthAudioProcessor& p)
 	: AudioProcessorEditor(&p), audioProcessor(p), 
 	mainParamComponent(p, "Main", {
-		{"Gain", "gain"},
+		{"Gain 1", "gain"},
 		}),
 	stringParamComponent(p, "String",{
 		{"String Length", "string_length"},
@@ -37,6 +37,8 @@ PhysicsBasedSynthAudioProcessorEditor::PhysicsBasedSynthAudioProcessorEditor (Ph
 	visualizer(p.valueTree)
 {
 	setSize(1000, 700);
+
+	stringParamComponent.getSlider("string_harmonics")->slider.setNormalisableRange(NormalisableRange<double>(8, 48, 8));
 	
 	addAndMakeVisible(mainParamComponent);
 	addAndMakeVisible(stringParamComponent);
