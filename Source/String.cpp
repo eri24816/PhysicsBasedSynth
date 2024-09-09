@@ -186,14 +186,16 @@ namespace InstrumentPhysics {
 
 
 	static float horizontal_sum(__m256 vec) {
-		__m128 low = _mm256_castps256_ps128(vec);
+		/*__m128 low = _mm256_castps256_ps128(vec);
 		__m128 high = _mm256_extractf128_ps(vec, 1);
 		low = _mm_add_ps(low, high);
 		__m128 shuf = _mm_movehdup_ps(low);
 		low = _mm_add_ps(low, shuf);
 		shuf = _mm_movehl_ps(shuf, low);
 		low = _mm_add_ss(low, shuf);
-		return _mm_cvtss_f32(low);
+		return _mm_cvtss_f32(low);*/
+		vec = _mm256_hadd_ps(vec, vec);
+		return vec.m256_f32[0] + vec.m256_f32[1] + vec.m256_f32[4] + vec.m256_f32[5];
 	}
 
 	//Vectorized version of sampleU using _mm256_sincos_pd and _mm256_fmadd_pd etc.
@@ -250,10 +252,10 @@ namespace InstrumentPhysics {
 		this->t = t;
 		// TODO: use a physical damping model
 		if (damping != 0) {
+			__m256 factorConst = _mm256_set1_ps(-damping * 0.002 * dt);
 			for (int i = 0; i < nHarmonics / 8; i++)
 			{
-				__m256 factor = _mm256_set1_ps(-damping * 0.002 * dt);
-				factor = _mm256_mul_ps(factor, harmonicFreqs[i]);
+				__m256 factor = _mm256_mul_ps(factorConst, harmonicFreqs[i]);
 				factor = _mm256_exp_ps(factor);
 				a[i] = _mm256_mul_ps(a[i], factor);
 				b[i] = _mm256_mul_ps(b[i], factor);

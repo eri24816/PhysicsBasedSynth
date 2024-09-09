@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <JUCERPROJECT id="guUdRR" name="PhysicsBasedSynth" projectType="audioplug"
-              useAppConfig="0" addUsingNamespaceToJuceHeader="0" jucerFormatVersion="1"
-              pluginCharacteristicsValue="pluginIsSynth,pluginWantsMidiIn">
+              useAppConfig="0" addUsingNamespaceToJuceHeader="1" jucerFormatVersion="1"
+              pluginCharacteristicsValue="pluginIsSynth,pluginWantsMidiIn"
+              pluginFormats="buildVST3">
   <MAINGROUP id="Kz5Htd" name="PhysicsBasedSynth">
     <GROUP id="{A35EC80A-331A-DFF9-AF77-C01BBCA2B22D}" name="Maximilian">
       <GROUP id="{E3F03F52-6E35-C9C2-A849-7C098FE8FAF0}" name="src">
