@@ -57,7 +57,7 @@ public:
 		Logger::getCurrentLogger()->writeToLog("freq: " + String(frequency));
 
 
-		simulation = std::make_unique<InstrumentPhysics::Simulation>();
+		simulation = std::make_unique<InstrumentPhysics::Simulation>(1.0f / this->getSampleRate());
 		/*string = std::make_shared<InstrumentPhysics::String>(stringLength, stringTension, stringDensity,
             stringStiffness,
             (int)getParam("string_harmonics"),
@@ -101,11 +101,10 @@ public:
         if (!simulation) {
             return;
         }
-        const float dt = 1.0f / this->getSampleRate();
 		const float gain = getParam("gain");
         for (int sample = 0; sample < numSamples; ++sample)
         {
-			simulation->update(dt);
+			simulation->update();
             const float currentSample = string->sampleU(0.01) * 50 * gain;
             for (int channel = 0; channel < outputBuffer.getNumChannels(); ++channel)
             {

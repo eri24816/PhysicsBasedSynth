@@ -16,39 +16,7 @@
 #include <stdexcept>
 
 
-/*
-By sin(x+d) = sin(x)cos(d) + cos(x)sin(d), we can compute sin(x+d) and cos(x+d) from sin(x) and cos(x) with only multiplication and addition.
-*/
-class FastSequentialSinCos {
-public:
-	FastSequentialSinCos(float x, float d, int calculatePerciseInterval = 100){
-		this->x = x;
-		this->d = d;
-		this->calculatePerciseInterval = calculatePerciseInterval;
-		counter = 0;
-		sinD = std::sin(d);
-		cosD = std::cos(d);
-		calculatePercise();
-	}
 
-	inline void next() {
-		float oldSinX = sinX;
-		sinX = sinX * cosD + cosX * sinD;
-		cosX = cosX * cosD - oldSinX * sinD;
-	}
-
-private:
-	float calculatePerciseInterval, counter = 0;
-	float x, d;
-	float sinX, cosX, sinD, cosD;
-
-	void calculatePercise() {
-		sinX = std::sin(x);
-		cosX = std::cos(x);
-		counter = 0;
-	}
-
-};
 
 namespace InstrumentPhysics {
 #ifndef USE_AVX2
@@ -135,10 +103,15 @@ namespace InstrumentPhysics {
 #ifdef USE_AVX2
 
 
+	 
 	String::String(float L, float tension, float rho, float ESK2, int nHarmonics, float damping)
 		: L(L), tension(tension), rho(rho), ESK2(ESK2), nHarmonics(nHarmonics), transform(nullptr, Vector2<float>{0.0f, 0.0f}), damping(damping)
 	{
 		// raise if nHarmonics > STRING_MAX_HARMONICS
+
+		recip_L = 1.0f / L;
+		pi_div_L = PI / L;
+		two_div_rho_L = 2.0f / rho / L;
 
 		this->nHarmonics = std::min(this->nHarmonics, STRING_MAX_HARMONICS);
 		this->nHarmonics = (this->nHarmonics / 8) * 8; // Round down to the nearest multiple of 8 (for vectorization)
@@ -198,6 +171,15 @@ namespace InstrumentPhysics {
 		return vec.m256_f32[0] + vec.m256_f32[1] + vec.m256_f32[4] + vec.m256_f32[5];
 	}
 
+	void String::setDt(float dt){
+		omegaTFastSinCos.clear();
+		for (int i = 0; i < nHarmonics / 8; i++)
+		{
+			FastSuccessiveSinCos* fastSinCos = new FastSuccessiveSinCos(_mm256_setzero_ps(),_mm256_mul_ps(harmonicOmega[i], _mm256_set1_ps(dt)));
+			omegaTFastSinCos.push_back(std::unique_ptr<FastSuccessiveSinCos>(fastSinCos));
+		}
+	}
+
 	//Vectorized version of sampleU using _mm256_sincos_pd and _mm256_fmadd_pd etc.
 	// This function assumes that nHarmonics is a multiple of 8 for simplicity.
 	float String::sampleU(float x) const
@@ -206,7 +188,7 @@ namespace InstrumentPhysics {
 		__m256 u_vec = _mm256_setzero_ps();
 
 		// Prepare constant values
-		const float pi_x_div_L = PI * x / L;
+		const float pi_x_div_L = pi_div_L * x;
 		__m256 pi_x_div_L_vec = _mm256_set1_ps(pi_x_div_L);
 
 		for (int i = 0; i < nHarmonics/8; i++)
@@ -219,16 +201,10 @@ namespace InstrumentPhysics {
 			__m256 xComp_vec = _mm256_sin_ps(n_pi_x_div_L_vec);
 
 			// Compute omegaT = harmonicOmega[n] * t
-			__m256 t_vec = _mm256_set1_ps(t);
-			__m256 omegaT_vec = _mm256_mul_ps(harmonicOmega[i], t_vec);
 
-			// Compute cos(omegaT) and sin(omegaT)
-			__m256 sinOmegaT_vec, cosOmegaT_vec;
-			sinOmegaT_vec = _mm256_sincos_ps(&cosOmegaT_vec, omegaT_vec);
+			__m256 term1 = _mm256_mul_ps(a[i], omegaTFastSinCos[i]->cosX);
+			__m256 term2 = _mm256_mul_ps(b[i], omegaTFastSinCos[i]->sinX);
 
-			// (a[n] * cos(omegaT) + b[n] * sin(omegaT)) * sin(n * pi_x_div_L)
-			__m256 term1 = _mm256_mul_ps(a[i], cosOmegaT_vec);
-			__m256 term2 = _mm256_mul_ps(b[i], sinOmegaT_vec);
 			__m256 result_vec = _mm256_add_ps(term1, term2);
 
 			// Multiply by xComp
@@ -261,6 +237,9 @@ namespace InstrumentPhysics {
 				b[i] = _mm256_mul_ps(b[i], factor);
 			}
 		}
+		for (auto& fastSinCos : omegaTFastSinCos) {
+			fastSinCos->next();
+		}
 	}
 
 
@@ -269,9 +248,8 @@ namespace InstrumentPhysics {
 	void String::applyImpulse(float x, float J)
 	{
 		// Precompute constant factor
-		const float factor = 2 * J / L / rho;
-		__m256 factor_vec = _mm256_set1_ps(factor);
-		__m256 pi_x_div_L_vec = _mm256_set1_ps(PI * x / L);
+		__m256 factor_vec = _mm256_set1_ps(J * two_div_rho_L);
+		__m256 pi_x_div_L_vec = _mm256_set1_ps(x * pi_div_L);
 
 		for (int i = 0; i < nHarmonics / 8; i++)
 		{
@@ -282,20 +260,12 @@ namespace InstrumentPhysics {
 			__m256 sin_n_pi_x_div_L_vec = _mm256_sin_ps(n_pi_x_div_L_vec);  // Vectorized sin computation
 			xComp_vec = _mm256_mul_ps(xComp_vec, sin_n_pi_x_div_L_vec);
 
-			// Compute omegaT = harmonicOmega[n] * t
-			__m256 t_vec = _mm256_set1_ps(t);
-			__m256 omegaT_vec = _mm256_mul_ps(harmonicOmega[i], t_vec);
-
-			// Compute sin(omegaT) and cos(omegaT)
-			__m256 sinOmegaT_vec, cosOmegaT_vec;
-			sinOmegaT_vec = _mm256_sincos_ps(&cosOmegaT_vec, omegaT_vec);
-
 			// a[n] += xComp * cos(omegaT)
-			__m256 a_update = _mm256_mul_ps(xComp_vec, cosOmegaT_vec);
+			__m256 a_update = _mm256_mul_ps(xComp_vec, omegaTFastSinCos[i]->cosX);
 			a[i] = _mm256_add_ps(a[i], a_update);
 
 			// b[n] += xComp * sin(omegaT)
-			__m256 b_update = _mm256_mul_ps(xComp_vec, sinOmegaT_vec);
+			__m256 b_update = _mm256_mul_ps(xComp_vec, omegaTFastSinCos[i]->sinX);
 			b[i] = _mm256_add_ps(b[i], b_update);
 		}
 	}

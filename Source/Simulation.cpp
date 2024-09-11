@@ -12,7 +12,8 @@
 
 namespace InstrumentPhysics
 {
-	Simulation::Simulation()
+	Simulation::Simulation(float dt)
+		: dt(dt)
 	{
 		t = 0.0f;
 	}
@@ -26,7 +27,7 @@ namespace InstrumentPhysics
 		return t;
 	}
 
-	void Simulation::update(float dt)
+	void Simulation::update()
 	{
 		for (auto& interaction : interactions)
 		{
@@ -41,6 +42,7 @@ namespace InstrumentPhysics
 
 	void Simulation::addObject(std::shared_ptr<Object> object)
 	{
+		object->setDt(dt);
 		objects.push_back(object);
 	}
 

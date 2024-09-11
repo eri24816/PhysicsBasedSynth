@@ -103,8 +103,8 @@
   <EXPORTFORMATS>
     <VS2022 targetFolder="Builds/VisualStudio2022">
       <CONFIGURATIONS>
-        <CONFIGURATION isDebug="0" name="Release" targetName="PhysicsBasedSynth" headerPath="D:\PhysicsBasedSynth\Source\Maximilian\src"/>
-        <CONFIGURATION isDebug="1" name="Debug" targetName="PhysicsBasedSynth" headerPath="D:\PhysicsBasedSynth\Source\Maximilian\src"/>
+        <CONFIGURATION isDebug="0" name="Release" targetName="PhysicsBasedSynth"/>
+        <CONFIGURATION isDebug="1" name="Debug" targetName="PhysicsBasedSynth_debug"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_audio_basics" path="C:\JUCE\modules"/>

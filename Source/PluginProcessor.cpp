@@ -173,15 +173,18 @@ juce::AudioProcessorEditor* PhysicsBasedSynthAudioProcessor::createEditor()
 //==============================================================================
 void PhysicsBasedSynthAudioProcessor::getStateInformation (juce::MemoryBlock& destData)
 {
-    // You should use this method to store your parameters in the memory block.
-    // You could do that either as raw data, or use the XML or ValueTree classes
-    // as intermediaries to make it easy to save and load complex data.
+	auto state = valueTree.copyState();
+	std::unique_ptr<XmlElement> xml(state.createXml());
+	copyXmlToBinary(*xml, destData);
 }
 
 void PhysicsBasedSynthAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
 {
-    // You should use this method to restore your parameters from this memory block,
-    // whose contents will have been created by the getStateInformation() call.
+    std::unique_ptr<juce::XmlElement> xmlState(getXmlFromBinary(data, sizeInBytes));
+
+    if (xmlState.get() != nullptr)
+        if (xmlState->hasTagName(valueTree.state.getType()))
+            valueTree.replaceState(juce::ValueTree::fromXml(*xmlState));
 }
 
 //==============================================================================
@@ -221,6 +224,5 @@ AudioProcessorValueTreeState::ParameterLayout PhysicsBasedSynthAudioProcessor::c
 	params.push_back(std::make_unique<AudioParameterFloat>("visualizer_y_scale", "Visualizer Y Scale", 1, 500.0, 100.0));
 	params.push_back(std::make_unique<AudioParameterFloat>("visualizer_time_scale", "Visualizer Time Scale", NormalisableRange<float>(0.0001, 1.0,0), 0.0001));
 	params.push_back(std::make_unique<AudioParameterInt>("visualizer_note", "Visualizer Note", 0, 127, 60));
-
     return { params.begin(), params.end() };
 }

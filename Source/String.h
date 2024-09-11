@@ -18,6 +18,8 @@
 #include "PhysicsUtil.h"
 
 #include <immintrin.h>
+#include <vector>
+#include <memory>
 namespace InstrumentPhysics {
 
 	constexpr float PI = 3.14159265358979323846;
@@ -60,6 +62,40 @@ namespace InstrumentPhysics {
 #endif
 
 #ifdef USE_AVX2
+	/*
+By sin(x+d) = sin(x)cos(d) + cos(x)sin(d), we can compute sin(x+d) and cos(x+d) from sin(x) and cos(x) with only multiplication and addition.
+*/
+	class FastSuccessiveSinCos {
+	public:
+		FastSuccessiveSinCos(__m256 x, __m256 d, float calculateExactInterval=30)
+		{
+			this->calculateExactInterval = calculateExactInterval;
+			this->x = x;
+			this->d = d;
+			sinX = _mm256_sin_ps(this->x);
+			cosX = _mm256_cos_ps(this->x);
+			sinD = _mm256_sin_ps(this->d);
+			cosD = _mm256_cos_ps(this->d);
+			calculateExact();
+		}
+
+		inline void next() {
+			__m256 oldSinX = sinX;
+			sinX = _mm256_add_ps(_mm256_mul_ps(oldSinX, cosD), _mm256_mul_ps(cosX, sinD));
+			cosX = _mm256_sub_ps(_mm256_mul_ps(cosX, cosD), _mm256_mul_ps(oldSinX, sinD));
+		}
+
+
+		void calculateExact() {
+			sinX = _mm256_sin_ps(this->x);
+			cosX = _mm256_cos_ps(this->x);
+		}
+		__m256 sinX, cosX;
+	private:
+		float calculateExactInterval, counter = 0;
+		__m256 x, d;
+		__m256 sinD, cosD;
+	};
 
 	class String : public Object
 	{
@@ -67,7 +103,7 @@ namespace InstrumentPhysics {
 		String(float L, float tension, float density, float stiffness, int harmonics, float damping);
 		String(SingleStringProfile profile) : String(profile.length, profile.tension, profile.density, profile.stiffness, profile.harmonics, profile.damping) {}
 
-
+		void setDt(float dt) override;
 		float sampleU(float x) const;
 		void update(float t, float dt) override;
 		void applyImpulse(float x, float J);
@@ -78,6 +114,7 @@ namespace InstrumentPhysics {
 	private:
 		float t = 0;
 		float L, tension, rho, ESK2, B, c, f0, damping;
+		float recip_L, pi_div_L, two_div_rho_L;
 		int nHarmonics;
 
 
@@ -87,6 +124,8 @@ namespace InstrumentPhysics {
 
 		__m256 harmonicFreqs[STRING_MAX_HARMONICS / 8];
 		__m256 harmonicOmega[STRING_MAX_HARMONICS / 8];
+
+		std::vector<std::unique_ptr<FastSuccessiveSinCos>> omegaTFastSinCos;
 
 		float getHarmonicFreq(int n) const;
 
