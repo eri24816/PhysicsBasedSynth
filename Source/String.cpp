@@ -120,15 +120,6 @@ namespace InstrumentPhysics {
 		c = std::sqrtf(tension / rho);
 		f0 = c / (2 * L);
 
-		//for (int n = 1; n <= this->nHarmonics; n++)
-		//{
-		//	// precompute stuff for speed
-		//	harmonicFreqs[n] = getHarmonicFreq(n);
-		//	harmonicOmega[n] = TWO_PI * harmonicFreqs[n];
-		//	a[n] = 0;
-		//	b[n] = 0;
-		//}
-
 
 		for (int i = 0; i < nHarmonics / 8; i++)
 		{
@@ -142,7 +133,6 @@ namespace InstrumentPhysics {
 			float temp[8];
 			for (int j = 0; j < 8; j++) {
 				int n = i * 8 + j + 1;
-				// precompute stuff for speed
 				temp[j] = getHarmonicFreq(n);
 			}
 
@@ -159,14 +149,6 @@ namespace InstrumentPhysics {
 
 
 	static float horizontal_sum(__m256 vec) {
-		/*__m128 low = _mm256_castps256_ps128(vec);
-		__m128 high = _mm256_extractf128_ps(vec, 1);
-		low = _mm_add_ps(low, high);
-		__m128 shuf = _mm_movehdup_ps(low);
-		low = _mm_add_ps(low, shuf);
-		shuf = _mm_movehl_ps(shuf, low);
-		low = _mm_add_ss(low, shuf);
-		return _mm_cvtss_f32(low);*/
 		vec = _mm256_hadd_ps(vec, vec);
 		return vec.m256_f32[0] + vec.m256_f32[1] + vec.m256_f32[4] + vec.m256_f32[5];
 	}
