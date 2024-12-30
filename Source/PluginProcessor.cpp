@@ -206,8 +206,8 @@ AudioProcessorValueTreeState::ParameterLayout PhysicsBasedSynthAudioProcessor::c
 	// length, density, stiffness, damping, number of harmonics (tension is derived from these)
 	params.push_back(std::make_unique<AudioParameterFloat>("string_length", "String Length", 0.1, 10.0, 1));
 	params.push_back(std::make_unique<AudioParameterFloat>("string_density", "String Density", 0.1, 10.0, 1));
-	params.push_back(std::make_unique<AudioParameterFloat>("string_stiffness", "String Stiffness", 0, 10.0, 1));
-	params.push_back(std::make_unique<AudioParameterFloat>("string_damping", "String Damping", 0, 10.0, 1));
+	params.push_back(std::make_unique<AudioParameterFloat>("string_stiffness", "String Stiffness", 0, 5000.0, 1));
+	params.push_back(std::make_unique<AudioParameterFloat>("string_damping", "String Damping", 0, 20.0, 1));
 
 	params.push_back(std::make_unique<AudioParameterInt>("string_harmonics", "String Harmonics", 8,48,48));
 
@@ -216,7 +216,8 @@ AudioProcessorValueTreeState::ParameterLayout PhysicsBasedSynthAudioProcessor::c
 	params.push_back(std::make_unique<AudioParameterFloat>("hammer_mass", "Hammer Mass (g)", 0.1, 20, 9));
 	params.push_back(std::make_unique<AudioParameterFloat>("hammer_position", "Hammer Position", 0, 1.0f, 0.1));
 	params.push_back(std::make_unique<AudioParameterFloat>("hammer_velocity", "Hammer Velocity", 0.1f, 10.0f, 3));
-	params.push_back(std::make_unique<AudioParameterFloat>("hammer_youngs_modulus", "Hammer Young's Modulus", 200000, 8000000, 2000000));
+	params.push_back(std::make_unique<AudioParameterFloat>("hammer_hardness", "Hammer Hardness", 0.01f, 150, 1));
+	params.push_back(std::make_unique<AudioParameterFloat>("hammer_nonlinearity", "Hammer Nonlinearity", 1, 5, 3.7));
 
     // visualizing parameters
 	// x scale, y scale, time scale, note

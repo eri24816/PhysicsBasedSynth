@@ -16,6 +16,7 @@
 #include <cmath>
 #include "Object.h"
 #include "PhysicsUtil.h"
+#include <JuceHeader.h>
 
 #include <immintrin.h>
 #include <vector>
@@ -108,6 +109,7 @@ By sin(x+d) = sin(x)cos(d) + cos(x)sin(d), we can compute sin(x+d) and cos(x+d) 
 		void update(float t, float dt) override;
 		void applyImpulse(float x, float J);
 		float getLength() const { return L; }
+		float getDensity() const { return rho; }
 
 		Transform transform;
 
@@ -133,7 +135,7 @@ By sin(x+d) = sin(x)cos(d) + cos(x)sin(d), we can compute sin(x+d) and cos(x+d) 
 
 #endif
 
-	class StringProfile {
+	class StringProfile { 
 	public:
 		virtual SingleStringProfile getProfile(int pitch, float pLength, float pDensity, float pStiffness, float pDamping, float pHarmonics) const = 0;
 	};
@@ -149,14 +151,45 @@ By sin(x+d) = sin(x)cos(d) + cos(x)sin(d), we can compute sin(x+d) and cos(x+d) 
 
 		/*
 		Arguments starts with "p" are parameters that can be adjusted by the user.
+		base values comes from https://inria.hal.science/hal-00688679v1/document.
 		*/
 		SingleStringProfile getProfile(int pitch, float pLength, float pDensity, float pStiffness, float pDamping, float pHarmonics) const override{
+
+			float baseDensity;
+			if (pitch <= 40) {
+				// Wrapped with copper
+				baseDensity = 0.193459 - 0.004479 * pitch;
+			}
+			else {
+				// Not wrapped
+				baseDensity = 0.01041554901 - 0.00006553235947 * pitch;
+			}
+
+			// 2.7 -0.033 * pitch
+			float baseLength;
+			if (pitch <= 40) {
+				baseLength = 2.7 - 0.033 * pitch; 
+			}
+			else {
+				baseLength = 0.657 * std::pow(1.91956, -(pitch - 60) / 12.0);
+			}
+
 			float frequency = 440 * std::pow(2.0, (pitch - 69) / 12.0);
-			float length = 0.657 * std::pow(1.91956, -(pitch - 60) / 12.0) * pLength;
-			float density = 0.02792 * pDensity;
+			float length = baseLength * pLength;
+			float density = baseDensity * pDensity; 
 			float stiffness = 2.67e-4 * pStiffness;
 			float tension = calculateStringTension(frequency, density, length, stiffness);
-			float damping = 0.05 * pDamping;
+			float damping = 0.07 * pDamping;
+			juce::Logger::writeToLog(
+				"Pitch: " + juce::String(pitch) + "\n" +
+				"Frequency: " + juce::String(frequency) + "\n" +
+				"Length: " + juce::String(length) + "\n" +
+				"Density: " + juce::String(density) + "\n" +
+				"Stiffness: " + juce::String(stiffness) + "\n" +
+				"Tension: " + juce::String(tension) + "\n" +
+				"Damping: " + juce::String(damping) + "\n");
+
+
 			return { length, tension, density, stiffness, damping, pHarmonics };
 		}
 	};

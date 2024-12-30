@@ -140,11 +140,6 @@ namespace InstrumentPhysics {
 			harmonicOmega[i] = _mm256_mul_ps(_mm256_set1_ps(TWO_PI), harmonicFreqs[i]);
 		}
 
-		juce::Logger::writeToLog("String tension: " + juce::String(tension));
-		juce::Logger::writeToLog("String density: " + juce::String(rho));
-		juce::Logger::writeToLog("String stiffness: " + juce::String(ESK2));
-		juce::Logger::writeToLog("String length: " + juce::String(L));
-		juce::Logger::writeToLog("String f0: " + juce::String(f0));
 	}
 
 
@@ -210,7 +205,7 @@ namespace InstrumentPhysics {
 		this->t = t;
 		// TODO: use a physical damping model
 		if (damping != 0) {
-			__m256 factorConst = _mm256_set1_ps(-damping * 0.002 * dt);
+			__m256 factorConst = _mm256_set1_ps(-damping * 0.002 * dt / L);
 			for (int i = 0; i < nHarmonics / 8; i++)
 			{
 				__m256 factor = _mm256_mul_ps(factorConst, harmonicFreqs[i]);

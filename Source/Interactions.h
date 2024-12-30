@@ -24,16 +24,17 @@ namespace InstrumentPhysics
 		virtual void apply(float t, float dt) = 0;
 	};
 
+	// https://ccrma.stanford.edu/~jos/pasp/Nonlinear_Spring_Model.html
 	class HammerStringInteraction : public Interaction {
 	public:
 
 		const std::shared_ptr<Rigidbody> hammer;
 
 		const std::shared_ptr<String> string;
-		const float youngsModulus;
+		const float Q0, p;
 
-		HammerStringInteraction(std::shared_ptr<Rigidbody> hammer, Vector2<float> hammerAttachPoint, std::shared_ptr<String> string, float youngsModulus)
-			: hammer(hammer), string(string), youngsModulus(youngsModulus)
+		HammerStringInteraction(std::shared_ptr<Rigidbody> hammer, Vector2<float> hammerAttachPoint, std::shared_ptr<String> string, float Q0, float p)
+			: hammer(hammer), string(string), Q0(Q0), p(p)
 		{
 		}
 
@@ -46,7 +47,7 @@ namespace InstrumentPhysics
 				string->transform.createChild(Vector2<float>{0.0f, string->sampleU(posHS.x)}).getWorldPos();
 			
 			if (posHP.y > 0){
-				auto impulse = posHP.y * youngsModulus * dt;
+				auto impulse = pow(posHP.y, p) * Q0 * dt;
 				string->applyImpulse(posHS.x, impulse);
 				hammer->applyImpulse(Vector2<float>{0.0f, 0.0f}, Vector2<float>{0.0f, -impulse});
 			}

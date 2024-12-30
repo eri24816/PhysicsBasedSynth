@@ -58,10 +58,7 @@ public:
 
 
 		simulation = std::make_unique<InstrumentPhysics::Simulation>(1.0f / this->getSampleRate());
-		/*string = std::make_shared<InstrumentPhysics::String>(stringLength, stringTension, stringDensity,
-            stringStiffness,
-            (int)getParam("string_harmonics"),
-			getParam("string_damping"));*/
+
 
 		string = std::make_shared<InstrumentPhysics::String>(stringProfile->getProfile(midiNoteNumber, stringLength, stringDensity, stringStiffness, stringDamping, stringHarmonics));
 		hammer = std::make_shared<InstrumentPhysics::Rigidbody>(hammer_mass,
@@ -70,8 +67,16 @@ public:
 		simulation->addObject(string);
 		simulation->addObject(hammer);
 
-        simulation->addInteraction(std::make_shared<InstrumentPhysics::HammerStringInteraction>(hammer, InstrumentPhysics::Vector2<float>{0, 0}, string, getParam(
-            "hammer_youngs_modulus")));
+		// hammer compresses about 3e-4 m in average. This correction is added to avoid nonlinearity affect the magnitude of the force dramatically.
+		const float hammerHardnessCorrection = pow(3e-3, -getParam("hammer_nonlinearity")); 
+
+        simulation->addInteraction(std::make_shared<InstrumentPhysics::HammerStringInteraction>(
+            hammer,
+            InstrumentPhysics::Vector2<float>{0, 0},
+            string, 
+            30284 * hammerHardnessCorrection * getParam("hammer_hardness")*exp(0.045*(midiNoteNumber-21)),
+			getParam("hammer_nonlinearity") + 0.015*(midiNoteNumber - 21)
+        ));
 
 		// give hammer a initial speed
 		hammer->applyImpulse(InstrumentPhysics::Vector2<float>{0, 0}, InstrumentPhysics::Vector2<float>{0,hammer_mass * 
@@ -105,7 +110,7 @@ public:
         for (int sample = 0; sample < numSamples; ++sample)
         {
 			simulation->update();
-            const float currentSample = string->sampleU(0.01) * 50 * gain;
+            const float currentSample = string->sampleU(0.01) * 12500 * string->getDensity() * gain;
             for (int channel = 0; channel < outputBuffer.getNumChannels(); ++channel)
             {
 				outputBuffer.addSample(channel, startSample, currentSample);

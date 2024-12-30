@@ -16,17 +16,18 @@ PhysicsBasedSynthAudioProcessorEditor::PhysicsBasedSynthAudioProcessorEditor (Ph
 		{"Gain 6", "gain"},
 		}),
 	stringParamComponent(p, "String",{
-		{"String Length", "string_length"},
-		{"String Density", "string_density"},
-		{"String Stiffness", "string_stiffness"},
-		{"String Harmonics", "string_harmonics"},
-		{"String Damping", "string_damping"},
+		{"Length", "string_length"},
+		{"Density", "string_density"},
+		{"Stiffness", "string_stiffness"},
+		{"Harmonics", "string_harmonics"},
+		{"Damping", "string_damping"},
 		}),
 	hammerParamComponent(p, "Hammer", {
-		{"Hammer Mass (g)", "hammer_mass"},
-		{"Hammer Position", "hammer_position"},
-		{"Hammer Velocity", "hammer_velocity"},
-		{"Hammer Young's Modulus", "hammer_youngs_modulus"}
+		{"Mass (g)", "hammer_mass"},
+		{"Position", "hammer_position"},
+		{"Velocity", "hammer_velocity"},
+		{"Hardness", "hammer_hardness"},
+		{"Nonlinearity", "hammer_nonlinearity"}
 		}),
 	visualParamComponent(p, "Visual", {
 		{"X Scale", "visualizer_x_scale", 0.5},
