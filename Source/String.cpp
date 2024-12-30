@@ -138,6 +138,10 @@ namespace InstrumentPhysics {
 
 			harmonicFreqs[i] = _mm256_loadu_ps(temp);
 			harmonicOmega[i] = _mm256_mul_ps(_mm256_set1_ps(TWO_PI), harmonicFreqs[i]);
+
+			// k = n * pi / L
+			k[i] = _mm256_mul_ps(n[i], _mm256_set1_ps(pi_div_L));
+			half_k_sq[i] = _mm256_mul_ps(_mm256_mul_ps(k[i], k[i]), _mm256_set1_ps(0.5f));
 		}
 
 	}
@@ -152,7 +156,7 @@ namespace InstrumentPhysics {
 		omegaTFastSinCos.clear();
 		for (int i = 0; i < nHarmonics / 8; i++)
 		{
-			FastSuccessiveSinCos* fastSinCos = new FastSuccessiveSinCos(_mm256_setzero_ps(),_mm256_mul_ps(harmonicOmega[i], _mm256_set1_ps(dt)));
+			FastSuccessiveSinCos* fastSinCos = new FastSuccessiveSinCos(_mm256_mul_ps(harmonicOmega[i], _mm256_set1_ps(t)),_mm256_mul_ps(harmonicOmega[i], _mm256_set1_ps(dt)));
 			omegaTFastSinCos.push_back(std::unique_ptr<FastSuccessiveSinCos>(fastSinCos));
 		}
 	}
@@ -205,7 +209,7 @@ namespace InstrumentPhysics {
 		this->t = t;
 		// TODO: use a physical damping model
 		if (damping != 0) {
-			__m256 factorConst = _mm256_set1_ps(-damping * 0.002 * dt / L);
+			__m256 factorConst = _mm256_set1_ps(-damping * 0.002 * dt);
 			for (int i = 0; i < nHarmonics / 8; i++)
 			{
 				__m256 factor = _mm256_mul_ps(factorConst, harmonicFreqs[i]);
@@ -222,20 +226,32 @@ namespace InstrumentPhysics {
 
 	// Vectorized version of applyImpulse
 
-	void String::applyImpulse(float x, float J)
+	void String::applyImpulse(float x, float J, float sigma=0)
 	{
 		// Precompute constant factor
 		__m256 factor_vec = _mm256_set1_ps(J * two_div_rho_L);
-		__m256 pi_x_div_L_vec = _mm256_set1_ps(x * pi_div_L);
+		__m256 x_vec = _mm256_set1_ps(x);
+
+		__m256 neg_sigma_sq_vec; 
+		if (sigma != 0) {
+			neg_sigma_sq_vec = _mm256_set1_ps(-sigma * sigma);
+		}
 
 		for (int i = 0; i < nHarmonics / 8; i++)
 		{
 
-			// Compute xComp = (2 * J / L / rho) / harmonicOmega[n] * sin(n * PI * x / L)
-			__m256 n_pi_x_div_L_vec = _mm256_mul_ps(n[i], pi_x_div_L_vec);
+			// Compute xComp = (2 * J / L / rho) / harmonicOmega[n] * sin(kx)
+			__m256 kx_vec = _mm256_mul_ps(k[i], x_vec);
 			__m256 xComp_vec = _mm256_div_ps(factor_vec, harmonicOmega[i]);
-			__m256 sin_n_pi_x_div_L_vec = _mm256_sin_ps(n_pi_x_div_L_vec);  // Vectorized sin computation
-			xComp_vec = _mm256_mul_ps(xComp_vec, sin_n_pi_x_div_L_vec);
+			__m256 sin_kx_vec = _mm256_sin_ps(kx_vec);  // Vectorized sin computation
+			xComp_vec = _mm256_mul_ps(xComp_vec, sin_kx_vec);
+
+			// if sigma != 0, use gaussian impulse e^{-\frac{1}{2}k^2\sigma^2}
+
+			if (sigma != 0) {
+				__m256 gaussian_factor = _mm256_exp_ps(_mm256_mul_ps(half_k_sq[i], neg_sigma_sq_vec));
+				xComp_vec = _mm256_mul_ps(xComp_vec, gaussian_factor);
+			}
 
 			// a[n] += xComp * cos(omegaT)
 			__m256 a_update = _mm256_mul_ps(xComp_vec, omegaTFastSinCos[i]->cosX);

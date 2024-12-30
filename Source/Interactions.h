@@ -31,10 +31,12 @@ namespace InstrumentPhysics
 		const std::shared_ptr<Rigidbody> hammer;
 
 		const std::shared_ptr<String> string;
-		const float Q0, p;
+		const float Q0, p, width;
 
-		HammerStringInteraction(std::shared_ptr<Rigidbody> hammer, Vector2<float> hammerAttachPoint, std::shared_ptr<String> string, float Q0, float p)
-			: hammer(hammer), string(string), Q0(Q0), p(p)
+		HammerStringInteraction(std::shared_ptr<Rigidbody> hammer, Vector2<float> hammerAttachPoint, std::shared_ptr<String> string, float Q0, float p,
+			float width=0 
+			)
+			: hammer(hammer), string(string), Q0(Q0), p(p), width(width)
 		{
 		}
 
@@ -48,7 +50,7 @@ namespace InstrumentPhysics
 			
 			if (posHP.y > 0){
 				auto impulse = pow(posHP.y, p) * Q0 * dt;
-				string->applyImpulse(posHS.x, impulse);
+				string->applyImpulse(posHS.x, impulse, width);
 				hammer->applyImpulse(Vector2<float>{0.0f, 0.0f}, Vector2<float>{0.0f, -impulse});
 			}
 		}

@@ -26,6 +26,7 @@ namespace InstrumentPhysics
 		void addInteraction(std::shared_ptr<Interaction> interaction);
 		float getTime() const;
 		void update();
+		void setDt(float dt);
 	private:
 		float t;
 		float dt;

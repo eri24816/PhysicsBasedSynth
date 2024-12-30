@@ -40,6 +40,15 @@ namespace InstrumentPhysics
 		t += dt;
 	}
 
+	void Simulation::setDt(float dt)
+	{
+		this->dt = dt;
+		for (auto& object : objects)
+		{
+			object->setDt(dt);
+		}
+	}
+
 	void Simulation::addObject(std::shared_ptr<Object> object)
 	{
 		object->setDt(dt);

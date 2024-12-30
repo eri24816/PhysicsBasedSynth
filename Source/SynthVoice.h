@@ -56,8 +56,10 @@ public:
 
 		Logger::getCurrentLogger()->writeToLog("freq: " + String(frequency));
 
-
-		simulation = std::make_unique<InstrumentPhysics::Simulation>(1.0f / this->getSampleRate());
+        simulationDtCoarse = 1.0f / this->getSampleRate();
+        simulationDtFine = simulationDtCoarse / 4.0;
+		usingFineGrainSimulation = true;
+		simulation = std::make_unique<InstrumentPhysics::Simulation>(simulationDtFine);
 
 
 		string = std::make_shared<InstrumentPhysics::String>(stringProfile->getProfile(midiNoteNumber, stringLength, stringDensity, stringStiffness, stringDamping, stringHarmonics));
@@ -75,7 +77,8 @@ public:
             InstrumentPhysics::Vector2<float>{0, 0},
             string, 
             30284 * hammerHardnessCorrection * getParam("hammer_hardness")*exp(0.045*(midiNoteNumber-21)),
-			getParam("hammer_nonlinearity") + 0.015*(midiNoteNumber - 21)
+			getParam("hammer_nonlinearity") + 0.015*(midiNoteNumber - 21),
+			getParam("hammer_width") / 1000.0f // mm to m
         ));
 
 		// give hammer a initial speed
@@ -109,8 +112,23 @@ public:
 		const float gain = getParam("gain");
         for (int sample = 0; sample < numSamples; ++sample)
         {
-			simulation->update();
-            const float currentSample = string->sampleU(0.01) * 12500 * string->getDensity() * gain;
+			if (usingFineGrainSimulation)
+			{
+				simulation->update();
+				simulation->update();
+                simulation->update();
+                simulation->update();
+				if (simulation->getTime() > 5 * 0.001) // after 5ms, the hammer is considered to have left the string, so we can switch to coarse simulation
+				{
+					usingFineGrainSimulation = false;
+					simulation->setDt(simulationDtCoarse);
+				}
+			}
+            else {
+                simulation->update();
+            }
+            const float currentSample = string->sampleU(0.01) * 875 * sqrt(string->getDensity()) * gain;
+            //const float currentSample = string->sampleU(0.01) * 50 * gain;
             for (int channel = 0; channel < outputBuffer.getNumChannels(); ++channel)
             {
 				outputBuffer.addSample(channel, startSample, currentSample);
@@ -131,6 +149,8 @@ private:
     int pitch;
     double velocity;
     double frequency;
+	float simulationDtCoarse, simulationDtFine;
+	bool usingFineGrainSimulation = false;
     
 	std::unique_ptr<InstrumentPhysics::StringProfile> stringProfile = std::make_unique<InstrumentPhysics::GrandPianoStringProfile>();
 

@@ -27,7 +27,8 @@ PhysicsBasedSynthAudioProcessorEditor::PhysicsBasedSynthAudioProcessorEditor (Ph
 		{"Position", "hammer_position"},
 		{"Velocity", "hammer_velocity"},
 		{"Hardness", "hammer_hardness"},
-		{"Nonlinearity", "hammer_nonlinearity"}
+		{"Nonlinearity", "hammer_nonlinearity"},
+		{"Width", "hammer_width"}
 		}),
 	visualParamComponent(p, "Visual", {
 		{"X Scale", "visualizer_x_scale", 0.5},

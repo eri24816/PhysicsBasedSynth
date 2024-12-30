@@ -29,7 +29,7 @@ PhysicsBasedSynthAudioProcessor::PhysicsBasedSynthAudioProcessor()
 {
     mySynth.clearVoices();
 
-    for (int i = 0; i < 5; i++)
+    for (int i = 0; i < 10; i++)
     {
         auto voice = new SynthVoice();
         voice->setValueTree(valueTree);
@@ -218,6 +218,7 @@ AudioProcessorValueTreeState::ParameterLayout PhysicsBasedSynthAudioProcessor::c
 	params.push_back(std::make_unique<AudioParameterFloat>("hammer_velocity", "Hammer Velocity", 0.1f, 10.0f, 3));
 	params.push_back(std::make_unique<AudioParameterFloat>("hammer_hardness", "Hammer Hardness", 0.01f, 150, 1));
 	params.push_back(std::make_unique<AudioParameterFloat>("hammer_nonlinearity", "Hammer Nonlinearity", 1, 5, 3.7));
+	params.push_back(std::make_unique<AudioParameterFloat>("hammer_width", "Hammer Width", 5, 50, 10));
 
     // visualizing parameters
 	// x scale, y scale, time scale, note

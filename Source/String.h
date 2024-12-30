@@ -92,6 +92,7 @@ By sin(x+d) = sin(x)cos(d) + cos(x)sin(d), we can compute sin(x+d) and cos(x+d) 
 			cosX = _mm256_cos_ps(this->x);
 		}
 		__m256 sinX, cosX;
+
 	private:
 		float calculateExactInterval, counter = 0;
 		__m256 x, d;
@@ -107,7 +108,7 @@ By sin(x+d) = sin(x)cos(d) + cos(x)sin(d), we can compute sin(x+d) and cos(x+d) 
 		void setDt(float dt) override;
 		float sampleU(float x) const;
 		void update(float t, float dt) override;
-		void applyImpulse(float x, float J);
+		void applyImpulse(float x, float J, float sigma);
 		float getLength() const { return L; }
 		float getDensity() const { return rho; }
 
@@ -126,6 +127,8 @@ By sin(x+d) = sin(x)cos(d) + cos(x)sin(d), we can compute sin(x+d) and cos(x+d) 
 
 		__m256 harmonicFreqs[STRING_MAX_HARMONICS / 8];
 		__m256 harmonicOmega[STRING_MAX_HARMONICS / 8];
+		__m256 k[STRING_MAX_HARMONICS / 8];
+		__m256 half_k_sq[STRING_MAX_HARMONICS / 8];
 
 		std::vector<std::unique_ptr<FastSuccessiveSinCos>> omegaTFastSinCos;
 
