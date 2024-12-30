@@ -216,8 +216,23 @@ namespace InstrumentPhysics {
 				factor = _mm256_exp_ps(factor);
 				a[i] = _mm256_mul_ps(a[i], factor);
 				b[i] = _mm256_mul_ps(b[i], factor);
+
+
 			}
 		}
+
+		// limit the magnitude of a and b to prevent numerical instability
+		// limit: 1.5cm
+		__m256 limit = _mm256_set1_ps(0.015f);
+		__m256 neg_limit = _mm256_set1_ps(-0.015f);
+
+		for (int i = 0; i < nHarmonics / 8; i++) {
+			a[i] = _mm256_min_ps(a[i], limit);
+			a[i] = _mm256_max_ps(a[i], neg_limit);
+			b[i] = _mm256_min_ps(b[i], limit);
+			b[i] = _mm256_max_ps(b[i], neg_limit);
+		}
+
 		for (auto& fastSinCos : omegaTFastSinCos) {
 			fastSinCos->next();
 		}
