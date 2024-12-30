@@ -42,6 +42,8 @@ public:
     
     void startNote (int midiNoteNumber, float velocity, SynthesiserSound* sound, int currentPitchWheelPosition) override
     {
+        noteStopped = false;
+        timeAfterNoteStop = 0;
 		this->pitch = midiNoteNumber;
         this->velocity = velocity;
         frequency = MidiMessage::getMidiNoteInHertz(midiNoteNumber);
@@ -83,13 +85,18 @@ public:
 
 		// give hammer a initial speed
 		hammer->applyImpulse(InstrumentPhysics::Vector2<float>{0, 0}, InstrumentPhysics::Vector2<float>{0,hammer_mass * 
-			getParam("hammer_velocity")});
+			getParam("hammer_velocity")* velocity});
     }
     
     void stopNote (float velocity, bool allowTailOff) override
     {
-		simulation.reset();
-        clearCurrentNote();
+        if (allowTailOff) {
+            noteStopped = true;
+        }
+        else {
+            simulation.reset();
+            clearCurrentNote();
+        }
     }
     
     void pitchWheelMoved (int newPitchWheelValue) override
@@ -127,13 +134,22 @@ public:
             else {
                 simulation->update();
             }
-            const float currentSample = string->sampleU(0.01) * 875 * sqrt(string->getDensity()) * gain;
+            const float currentSample = string->sampleU(0.01) * 875 * sqrt(string->getDensity()) * gain * exp(-80*timeAfterNoteStop);
             //const float currentSample = string->sampleU(0.01) * 50 * gain;
             for (int channel = 0; channel < outputBuffer.getNumChannels(); ++channel)
             {
 				outputBuffer.addSample(channel, startSample, currentSample);
             }
             ++startSample;
+
+            if (noteStopped) {
+                timeAfterNoteStop += simulationDtCoarse;
+                if (timeAfterNoteStop > 0.3) {
+                    simulation.reset();
+                    clearCurrentNote();
+                    return;
+                }
+            }
         }
     }
 
@@ -151,6 +167,9 @@ private:
     double frequency;
 	float simulationDtCoarse, simulationDtFine;
 	bool usingFineGrainSimulation = false;
+
+    float timeAfterNoteStop = 0;
+    bool noteStopped = false;
 
 	std::unique_ptr<InstrumentPhysics::StringProfile> stringProfile = std::make_unique<InstrumentPhysics::GrandPianoStringProfile>();
 

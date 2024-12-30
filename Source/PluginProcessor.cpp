@@ -240,9 +240,9 @@ AudioProcessorValueTreeState::ParameterLayout PhysicsBasedSynthAudioProcessor::c
 	
 	// string parameters
 	// length, density, stiffness, damping, number of harmonics (tension is derived from these)
-	params.push_back(std::make_unique<AudioParameterFloat>("string_length", "String Length", 0.1, 10.0, 1));
-	params.push_back(std::make_unique<AudioParameterFloat>("string_density", "String Density", 0.1, 10.0, 1));
-	params.push_back(std::make_unique<AudioParameterFloat>("string_stiffness", "String Stiffness", 0, 5000.0, 1));
+	params.push_back(std::make_unique<AudioParameterFloat>("string_length", "String Length", 0.3, 10.0, 1));
+	params.push_back(std::make_unique<AudioParameterFloat>("string_density", "String Density", 0.5, 10.0, 1));
+	params.push_back(std::make_unique<AudioParameterFloat>("string_stiffness", "String Stiffness", 0, 5000.0, 1)); 
 	params.push_back(std::make_unique<AudioParameterFloat>("string_damping", "String Damping", 0, 20.0, 1));
 
 	params.push_back(std::make_unique<AudioParameterInt>("string_harmonics", "String Harmonics", 8,48,48));
