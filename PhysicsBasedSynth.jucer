@@ -73,6 +73,7 @@
       <FILE id="OwRVSe" name="Oscillator.cpp" compile="1" resource="0" file="Source/Oscillator.cpp"/>
       <FILE id="eeZITG" name="Oscillator.h" compile="0" resource="0" file="Source/Oscillator.h"/>
       <FILE id="gvoGMR" name="SynthSound.h" compile="0" resource="0" file="Source/SynthSound.h"/>
+      <FILE id="s7Df8L" name="data.h" compile="0" resource="0" file="Source/data.h"/>
       <FILE id="t4tWMl" name="SynthVoice.h" compile="0" resource="0" file="Source/SynthVoice.h"/>
       <FILE id="mOJTBU" name="PluginProcessor.cpp" compile="1" resource="0"
             file="Source/PluginProcessor.cpp"/>

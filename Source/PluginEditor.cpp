@@ -13,7 +13,8 @@
 PhysicsBasedSynthAudioProcessorEditor::PhysicsBasedSynthAudioProcessorEditor (PhysicsBasedSynthAudioProcessor& p)
 	: AudioProcessorEditor(&p), audioProcessor(p), 
 	mainParamComponent(p, "Main", {
-		{"Gain 6", "gain"},
+		{"Gain", "gain"},
+		{"Wet Dry", "wet_dry"}
 		}),
 	stringParamComponent(p, "String",{
 		{"Length", "string_length"},

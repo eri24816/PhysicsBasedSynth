@@ -60,6 +60,9 @@ public:
 private:
     juce::Synthesiser mySynth;
 
+    juce::dsp::Convolution convolution;
+    juce::AudioBuffer<float> dryBuffer;
+
     double lastSampleRate;
 
     juce::AudioProcessorValueTreeState::ParameterLayout createParameters();

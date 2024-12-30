@@ -151,7 +151,7 @@ private:
     double frequency;
 	float simulationDtCoarse, simulationDtFine;
 	bool usingFineGrainSimulation = false;
-    
+
 	std::unique_ptr<InstrumentPhysics::StringProfile> stringProfile = std::make_unique<InstrumentPhysics::GrandPianoStringProfile>();
 
 

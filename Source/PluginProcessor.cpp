@@ -8,6 +8,7 @@
 
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
+#include "data.h"
 
 using namespace juce;
 
@@ -113,6 +114,21 @@ void PhysicsBasedSynthAudioProcessor::prepareToPlay (double sampleRate, int samp
     // Use this method as the place to do any pre-playback
     // initialisation that you need..
     mySynth.setCurrentPlaybackSampleRate(sampleRate);
+
+    dsp::ProcessSpec spec;
+    spec.sampleRate = sampleRate;
+    spec.maximumBlockSize = samplesPerBlock;
+    spec.numChannels = getTotalNumOutputChannels();
+    convolution.reset(); 
+    convolution.prepare(spec); 
+	convolution.loadImpulseResponse(
+        piano_ir,
+        sizeof(char) * piano_ir_len,
+        juce::dsp::Convolution::Stereo::yes,
+		juce::dsp::Convolution::Trim::no,
+        0
+    );
+    dryBuffer.setSize(spec.numChannels, spec.maximumBlockSize);
 }
 
 void PhysicsBasedSynthAudioProcessor::releaseResources()
@@ -157,6 +173,25 @@ void PhysicsBasedSynthAudioProcessor::processBlock (juce::AudioBuffer<float>& bu
         buffer.clear (i, 0, buffer.getNumSamples());
 
     mySynth.renderNextBlock(buffer, midiMessages, 0, buffer.getNumSamples());
+    // dry signal
+    
+    dryBuffer.makeCopyOf(buffer, true);
+    dsp::AudioBlock<float> block(buffer);
+    dsp::ProcessContextReplacing<float> context(block);
+    convolution.process(context);
+
+    float wet = valueTree.getRawParameterValue("wet_dry")->load();
+	float dry = 1 - wet;
+
+	// gain wet signal
+	context.getOutputBlock().multiplyBy(wet);
+
+	// gain dry signal
+	dryBuffer.applyGain(dry);
+
+	// add dry signal
+	context.getOutputBlock().add<float>(dryBuffer);
+
 }
 
 //==============================================================================
@@ -200,7 +235,8 @@ AudioProcessorValueTreeState::ParameterLayout PhysicsBasedSynthAudioProcessor::c
 
 	// general parameters
     // gain
-	params.push_back(std::make_unique<AudioParameterFloat>("gain", "Gain", 0.0f, 2.0f, 1));
+	params.push_back(std::make_unique<AudioParameterFloat>("gain", "Gain", 0.0f, 5.0f, 1));
+	params.push_back(std::make_unique<AudioParameterFloat>("wet_dry", "Wet Dry", 0.0f, 1.0f, 0.5f));
 	
 	// string parameters
 	// length, density, stiffness, damping, number of harmonics (tension is derived from these)
